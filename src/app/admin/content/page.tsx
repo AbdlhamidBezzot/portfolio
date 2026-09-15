@@ -1,0 +1,1 @@
+import{ContentEditor}from"@/components/admin/ContentEditor";import{hasAdminSession}from"@/lib/admin-auth";import{redirect}from"next/navigation";export default function Page(){if(!hasAdminSession())redirect("/admin/login");return <ContentEditor/>}

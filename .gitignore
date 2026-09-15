@@ -1,0 +1,12 @@
+# Local environment secrets
+.env
+.env.local
+.env*.local
+!.env.example
+
+# Generated dependencies and build output
+node_modules/
+.next/
+
+# Local runtime logs
+*.log

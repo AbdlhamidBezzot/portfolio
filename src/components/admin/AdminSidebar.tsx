@@ -1,0 +1,3 @@
+import { FolderKanban, LayoutDashboard, Pencil } from "lucide-react";
+const links=[[LayoutDashboard,"Overview","/admin"],[Pencil,"Global content","/admin/content"],[FolderKanban,"Projects","/admin/projects"]] as const;
+export function AdminSidebar(){return <aside className="admin-sidebar"><a href="/en" className="admin-brand">AB</a><nav>{links.map(([Icon,label,href])=><a key={label} href={href} className="admin-nav-link"><Icon size={18}/><span>{label}</span></a>)}</nav><form action="/api/admin/logout" method="post" className="admin-logout"><button>Sign out</button></form><p className="admin-sidebar-note">// PORTFOLIO CMS</p></aside>}

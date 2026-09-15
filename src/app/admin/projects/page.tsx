@@ -1,0 +1,2 @@
+import { ProjectEditor } from "@/components/admin/ProjectEditor";import { hasAdminSession } from "@/lib/admin-auth";import { prisma } from "@/lib/db";import { redirect } from "next/navigation";
+export const dynamic="force-dynamic";export default async function ProjectsAdmin(){if(!hasAdminSession())redirect("/admin/login");const projects=await prisma.project.findMany({orderBy:{order:"asc"}});return <><header className="admin-page-header"><p>// PROJECTS / 02</p><h1>Project details.</h1></header><ProjectEditor projects={projects}/></>}

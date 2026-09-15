@@ -1,0 +1,1 @@
+export function Ticker(){const text="ÉCRIRE DU CODE  ✳  ENTRAÎNER UN MODÈLE  ✳  DÉPLOYER  ✳  DESIGNER UNE RECOMMANDATION  ✳  APPRENDRE  ✳  RECOMMENCER  ✳";return <div className="ticker" aria-label="Écrire du code, entraîner un modèle, déployer, recommencer"><div className="ticker-track"><span>{text}</span><span aria-hidden="true">{text}</span></div></div>}

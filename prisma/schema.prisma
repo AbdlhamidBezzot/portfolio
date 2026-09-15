@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SiteSettings {
+  id                  String   @id @default("main")
+  defaultLocale       String   @default("en")
+  brand               String   @default("AB")
+  heroName            String   @default("Abdelhamid Bezzot")
+  heroRoleEn          String   @default("")
+  heroRoleFr          String   @default("")
+  heroKickerEn        String   @default("")
+  heroKickerFr        String   @default("")
+  heroProjectsCtaEn   String   @default("")
+  heroProjectsCtaFr   String   @default("")
+  heroProjectsTarget  String   @default("#projects")
+  heroContactCtaEn    String   @default("")
+  heroContactCtaFr    String   @default("")
+  heroContactTarget   String   @default("#contact")
+  manifestoEn         String   @default("")
+  manifestoFr         String   @default("")
+  manifestoNoteEn     String   @default("")
+  manifestoNoteFr     String   @default("")
+  contactEyebrowEn    String   @default("")
+  contactEyebrowFr    String   @default("")
+  contactTitleEn      String   @default("")
+  contactTitleFr      String   @default("")
+  contactChoiceEn     String   @default("")
+  contactChoiceFr     String   @default("")
+  location            String   @default("")
+  footerEn            String   @default("")
+  footerFr            String   @default("")
+  seoTitleEn          String   @default("")
+  seoTitleFr          String   @default("")
+  seoDescriptionEn    String   @default("")
+  seoDescriptionFr    String   @default("")
+  updatedAt           DateTime @updatedAt
+}
+
+model MarqueeItem {
+  id        String   @id @default(cuid())
+  textEn    String
+  textFr    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model StackCategory {
+  id        String      @id @default(cuid())
+  nameEn    String
+  nameFr    String
+  order     Int         @default(0)
+  techs     StackTech[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([order])
+}
+
+model StackTech {
+  id         String        @id @default(cuid())
+  categoryId String
+  label      String
+  order      Int           @default(0)
+  category   StackCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId, order])
+}
+
+model ProcessStep {
+  id            String   @id @default(cuid())
+  titleEn       String
+  titleFr       String
+  descriptionEn String
+  descriptionFr String
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([order])
+}
+
+model ContactLink {
+  id        String   @id @default(cuid())
+  type      String   @unique
+  value     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  titleEn       String
+  titleFr       String
+  eyebrowEn     String   @default("")
+  eyebrowFr     String   @default("")
+  summaryEn     String
+  summaryFr     String
+  descriptionEn String
+  descriptionFr String
+  problemEn     String   @default("")
+  problemFr     String   @default("")
+  solutionEn    String   @default("")
+  solutionFr    String   @default("")
+  roleEn        String   @default("")
+  roleFr        String   @default("")
+  statusEn      String   @default("")
+  statusFr      String   @default("")
+  tags          String[]
+  imageUrl      String?
+  liveUrl       String?
+  githubUrl     String?
+  order         Int      @default(0)
+  published     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
