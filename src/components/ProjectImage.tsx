@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ProjectImageProps = {
   alt: string;
@@ -10,7 +10,15 @@ type ProjectImageProps = {
 
 export function ProjectImage({ alt, src, variant }: ProjectImageProps) {
   const [isPhoneImage, setIsPhoneImage] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
   const imageClass = variant === "project" ? "project-image" : "case-image";
+  const updateImageType = (image: HTMLImageElement) => {
+    setIsPhoneImage(image.naturalWidth > 0 && image.naturalHeight / image.naturalWidth >= 1.25);
+  };
+
+  useEffect(() => {
+    if (imageRef.current?.complete) updateImageType(imageRef.current);
+  }, [src]);
 
   return (
     <a
@@ -21,13 +29,11 @@ export function ProjectImage({ alt, src, variant }: ProjectImageProps) {
       aria-label={`Open full-size ${alt || "project image"}`}
     >
       <img
+        ref={imageRef}
         className={imageClass}
         src={src}
         alt={alt}
-        onLoad={(event) => {
-          const { naturalHeight, naturalWidth } = event.currentTarget;
-          setIsPhoneImage(naturalHeight / naturalWidth >= 1.25);
-        }}
+        onLoad={(event) => updateImageType(event.currentTarget)}
       />
     </a>
   );
