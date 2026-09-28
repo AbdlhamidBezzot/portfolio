@@ -24,8 +24,23 @@ async function main() {
     ["Writing code", "Écrire du code"], ["Training models", "Entraîner des modèles"], ["Breaking things", "Casser les choses"], ["Fixing them", "Les réparer"], ["Shipping", "Déployer"], ["Frontend", "Frontend"], ["Backend", "Backend"], ["Machine Learning", "Machine Learning"]
   ].map(([textEn, textFr], order) => ({ textEn, textFr, order })) });
 
-  if (await prisma.stackCategory.count() === 0) for (const [nameEn, nameFr, labels] of [["Interfaces", "Interfaces", ["HTML", "CSS", "JavaScript", "PHP", "Next.js", "NestJS"]], ["Systems & data", "Systèmes & données", ["PostgreSQL", "MySQL", "Redis", "PL/SQL", "T-SQL", "API REST"]], ["Applied AI", "IA appliquée", ["Scikit-Learn", "TensorFlow", "KNIME", "Talend", "TF-IDF", "KNN"]]] as const) {
-    await prisma.stackCategory.create({ data: { nameEn, nameFr, order: (await prisma.stackCategory.count()), techs: { create: labels.map((label, order) => ({ label, order })) } } });
+  await prisma.stackTech.deleteMany();
+  await prisma.stackCategory.deleteMany();
+  const stackData = [
+    ["Interfaces", "Interfaces", ["HTML", "CSS", "JavaScript", "TypeScript", "PHP", "React", "Next.js", "NestJS", "Tailwind CSS", "Node.js", "Vite"]],
+    ["Systems & data", "Systèmes & données", ["PostgreSQL", "MySQL", "Redis", "PL/SQL", "T-SQL", "API REST", "Prisma", "Docker", "Git & GitHub", "Linux", "Nginx", "Vercel"]],
+    ["Applied AI", "IA appliquée", ["Python", "Scikit-Learn", "TensorFlow", "KNIME", "Pandas", "NumPy", "Matplotlib", "Jupyter", "Talend", "LLM APIs (Claude)", "Prompt engineering"]]
+  ] as const;
+  for (let order = 0; order < stackData.length; order++) {
+    const [nameEn, nameFr, labels] = stackData[order];
+    await prisma.stackCategory.create({
+      data: {
+        nameEn,
+        nameFr,
+        order,
+        techs: { create: labels.map((label, order) => ({ label, order })) }
+      }
+    });
   }
 
   if (await prisma.processStep.count() === 0) await prisma.processStep.createMany({ data: [
