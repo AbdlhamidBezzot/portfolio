@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -21,13 +21,7 @@ export function ProjectImage({ alt, src, variant }: ProjectImageProps) {
   }, [src]);
 
   return (
-    <a
-      className={`image-frame${isPhoneImage ? " is-phone-image" : ""}`}
-      href={src}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`Open full-size ${alt || "project image"}`}
-    >
+    <div className={`image-frame${isPhoneImage ? " is-phone-image" : ""}`}>
       <img
         ref={imageRef}
         className={imageClass}
@@ -35,6 +29,6 @@ export function ProjectImage({ alt, src, variant }: ProjectImageProps) {
         alt={alt}
         onLoad={(event) => updateImageType(event.currentTarget)}
       />
-    </a>
+    </div>
   );
 }
