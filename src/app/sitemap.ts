@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "https://abdelhamidbezzot.dev"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abdelhamidbezzot.tech"
   ).replace(/\/$/, ""); // strip trailing slash
 
   let projects: { slug: string; updatedAt: Date }[] = [];
