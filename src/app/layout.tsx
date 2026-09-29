@@ -16,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    metadataBase: new URL("https://abdelhamidbezzot.dev"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://abdelhamidbezzot.dev"),
+
     alternates: { languages: { en: "/en", fr: "/fr" } },
     openGraph: {
       title,
