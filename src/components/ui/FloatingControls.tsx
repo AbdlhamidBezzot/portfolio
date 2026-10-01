@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowUpRight } from "lucide-react";
+import { X, ArrowUpRight, Menu } from "lucide-react";
 
 interface FloatingControlsProps {
   locale: "en" | "fr";
@@ -59,20 +59,20 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
   return (
     <>
       {/* Floating Centered Pill Navigation Bar */}
-      <div className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[210] max-w-[96vw] sm:max-w-max select-none">
-        <div className="flex items-center gap-1.5 sm:gap-3 md:gap-5 bg-[#363636] text-white p-1.5 sm:p-2 pl-2 sm:pl-3 pr-1.5 sm:pr-2 rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/10 backdrop-blur-md">
-          {/* Left: Monogram Circle AB_ */}
+      <div className="fixed top-3 sm:top-5 left-1/2 -translate-x-1/2 z-[210] max-w-[94vw] sm:max-w-max select-none">
+        <div className="flex items-center gap-1 sm:gap-3 bg-[#363636] text-white p-1 sm:p-1.5 pl-1.5 sm:pl-2.5 pr-1 sm:pr-2 rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/10 backdrop-blur-md">
+          {/* Left: Monogram Circle AB */}
           <Link
             href={`/${locale}`}
             onClick={closeAllPreviews}
             aria-label="Home"
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-[#DBF505] hover:text-[#363636] text-white flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all duration-200 flex-shrink-0"
           >
-            AB_
+            AB
           </Link>
 
           {/* Center: Nav links WORK / ABOUT / CONTACT */}
-          <nav className="flex items-center gap-1.5 sm:gap-4 md:gap-6 px-1 sm:px-2">
+          <nav className="flex items-center gap-1 sm:gap-3 md:gap-5 px-1 sm:px-2">
             <Link
               href={`/${locale}/work`}
               onClick={closeAllPreviews}
@@ -105,7 +105,7 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
           </nav>
 
           {/* Language switch EN / FR */}
-          <div className="hidden xs:flex items-center gap-1 text-[10px] sm:text-xs font-display font-bold px-1 sm:px-2 text-white/50 border-l border-white/15">
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-display font-bold px-1 sm:px-2 text-white/50 border-l border-white/15">
             <Link
               href={getLanguagePath("en")}
               className={`px-1.5 py-0.5 rounded-full transition-colors ${
@@ -125,24 +125,94 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
             </Link>
           </div>
 
-          {/* Right: White Pill Button with Contact Email */}
-          <a
-            href="mailto:abdelhamid.bezzot374@gmail.com"
-            className="hidden lg:inline-flex items-center justify-center bg-white text-[#363636] hover:bg-[#DBF505] text-[11px] font-display font-black tracking-wider uppercase py-2 px-4 rounded-full transition-all duration-200 flex-shrink-0 shadow-sm"
+          {/* Menu Trigger Button for Overlay */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close Menu" : "Open Menu"}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-[#DBF505] hover:text-[#363636] text-white flex items-center justify-center transition-colors flex-shrink-0"
           >
-            ABDELHAMID.BEZZOT374@GMAIL.COM
-          </a>
-
-          {/* Mobile White Pill Button */}
-          <a
-            href={`/${locale}/contact`}
-            onClick={closeAllPreviews}
-            className="inline-flex lg:hidden items-center justify-center bg-white text-[#363636] hover:bg-[#DBF505] text-[10px] sm:text-[11px] font-display font-black tracking-wider uppercase py-1.5 sm:py-2 px-2.5 sm:px-3.5 rounded-full transition-all duration-200 flex-shrink-0 shadow-sm"
-          >
-            CONTACT
-          </a>
+            {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
         </div>
       </div>
+
+      {/* Fullscreen Overlay Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="menu-overlay"
+          >
+            {/* Top Bar inside Overlay */}
+            <div className="flex justify-between items-center w-full pb-8 border-b border-[#363636]/10">
+              <div className="font-display font-black text-xl text-[#363636]">
+                ABDELHAMID BEZZOT
+              </div>
+              <div className="flex items-center gap-4 text-sm font-display font-bold">
+                <Link
+                  href={getLanguagePath("en")}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    locale === "en"
+                      ? "bg-[#363636] text-white"
+                      : "text-[#363636] hover:bg-[#D2D2D2]"
+                  }`}
+                >
+                  EN
+                </Link>
+                <span className="text-[#D2D2D2]">/</span>
+                <Link
+                  href={getLanguagePath("fr")}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    locale === "fr"
+                      ? "bg-[#363636] text-white"
+                      : "text-[#363636] hover:bg-[#D2D2D2]"
+                  }`}
+                >
+                  FR
+                </Link>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="my-auto py-12 flex flex-col items-start gap-4">
+              {navLinks.map((link, idx) => {
+                const isActive = pathname === link.path;
+                return (
+                  <motion.div
+                    key={link.path}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.08, duration: 0.3 }}
+                  >
+                    <Link
+                      href={link.path}
+                      onClick={() => {
+                        setIsOpen(false);
+                        closeAllPreviews();
+                      }}
+                      className={`display-link group flex items-center gap-4 ${
+                        isActive ? "text-[#06BC65]" : ""
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ArrowUpRight className="w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity text-[#06BC65]" />
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Strip inside Overlay */}
+            <div className="pt-8 border-t border-[#363636]/10 flex flex-wrap justify-between items-center gap-4 text-xs font-display font-bold tracking-widest text-[#363636]/70">
+              <div>ABDELHAMID.BEZZOT374@GMAIL.COM</div>
+              <div>AB ©</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

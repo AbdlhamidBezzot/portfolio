@@ -151,14 +151,14 @@ export function CollageHero({
     <>
       <section
         ref={heroRef}
-        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-4 pb-16 overflow-hidden flex flex-col items-center"
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-16 sm:pt-20 md:pt-24 pb-16 overflow-hidden flex flex-col items-center"
       >
         {/* Name Display positioned closer to cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full text-center mb-2 md:mb-4 select-none z-10"
+          className="w-full text-center mt-2 sm:mt-4 mb-2 md:mb-4 select-none z-10"
         >
           <h1 className="display-xxl tracking-tighter text-[#363636] leading-[0.82]">
             {name}
@@ -187,7 +187,6 @@ export function CollageHero({
                   whileHover={{ scale: 1.05, cursor: "grab" }}
                   whileDrag={{ scale: 1.08, zIndex: 150, cursor: "grabbing" }}
                   onDragStart={() => bringToFront(cfg.slug)}
-                  onTap={() => handleCardClick(cfg.slug)}
                   className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-grab active:cursor-grabbing touch-none`}
                   style={{
                     zIndex: currentZIndex,
@@ -195,7 +194,7 @@ export function CollageHero({
                   }}
                 >
                   {/* Photo area with DeviceFrame */}
-                  <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2">
+                  <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
                     <DeviceFrame
                       deviceType={deviceType}
                       imageUrl={imageUrl}
@@ -213,9 +212,17 @@ export function CollageHero({
                         {cfg.subtitle}
                       </div>
                     </div>
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCardClick(cfg.slug);
+                      }}
+                      aria-label={`Open ${cfg.title} details`}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer z-10 pointer-events-auto"
+                    >
                       <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </div>
+                    </button>
                   </div>
                 </motion.div>
               );
