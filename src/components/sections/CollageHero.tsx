@@ -341,7 +341,7 @@ export function CollageHero({
     {
       slug: "zaza",
       title: "ZAZA",
-      subtitle: locale === "en" ? "AI STYLIST COMMERCE" : "E-COMMERCE MODE IA",
+      subtitle: "E-COMMERCE",
       bgColor: "bg-[#F05626]", // Orange
       textColor: "text-white",
       rotateValue: 3,
