@@ -27,6 +27,7 @@ export interface ModalProject {
   statusFr?: string | null;
   tags?: string[];
   imageUrl?: string | null;
+  deviceType?: string | null;
   liveUrl?: string | null;
   githubUrl?: string | null;
 }
@@ -117,12 +118,23 @@ export function ProjectDetailModal({
             {/* Featured Hero Image / Device Frame Display */}
             {project.imageUrl && (
               <div className="relative w-full h-[260px] sm:h-[380px] md:h-[460px] rounded-[24px] overflow-hidden bg-[#D2D2D2]/20 mb-8 border border-[#363636]/10 flex items-center justify-center p-4">
-                <DeviceFrame
-                  deviceType={project.slug === "cinenight" ? "phone" : "laptop"}
-                  imageUrl={project.imageUrl}
-                  title={title}
-                  className="max-w-3xl"
-                />
+                {(project.slug === "cinenight" || project.deviceType === "phone") ? (
+                  <div className="h-full aspect-[9/19.5] relative flex-shrink-0">
+                    <DeviceFrame
+                      deviceType="phone"
+                      imageUrl={project.imageUrl}
+                      title={title}
+                      className="!h-full !w-full"
+                    />
+                  </div>
+                ) : (
+                  <DeviceFrame
+                    deviceType="laptop"
+                    imageUrl={project.imageUrl}
+                    title={title}
+                    className="w-full h-full max-w-3xl"
+                  />
+                )}
               </div>
             )}
 

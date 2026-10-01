@@ -7,60 +7,69 @@ interface FooterProps {
 
 export function Footer({ locale }: FooterProps) {
   return (
-    <footer className="w-full bg-[#D2D2D2] text-[#363636] py-16 px-6 md:px-12 border-t border-[#000000]/10 mt-24">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-        <div>
-          <div className="font-display font-black text-2xl tracking-tight mb-2">
-            ABDELHAMID BEZZOT
+    <footer className="w-full bg-[#D2D2D2] text-[#363636] py-12 sm:py-16 px-5 sm:px-8 md:px-12 border-t border-[#000000]/10 mt-16 sm:mt-24">
+      <div className="max-w-7xl mx-auto">
+        {/* Top row: name/role + links */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 sm:gap-8">
+          {/* Brand */}
+          <div className="min-w-0">
+            <div className="font-display font-black text-xl sm:text-2xl tracking-tight mb-1 truncate">
+              ABDELHAMID BEZZOT
+            </div>
+            <p className="font-display text-[10px] sm:text-xs text-[#363636]/70 uppercase tracking-widest">
+              {locale === "en"
+                ? "FULL-STACK DEVELOPER & AI ENGINEER"
+                : "DÉVELOPPEUR FULL-STACK & AI ENGINEER"}
+            </p>
           </div>
-          <p className="font-display text-xs text-[#363636]/70 uppercase tracking-widest">
-            {locale === "en"
-              ? "FULL-STACK DEVELOPER & AI ENGINEER"
-              : "DÉVELOPPEUR FULL-STACK & AI ENGINEER"}
-          </p>
+
+          {/* Social Links */}
+          <div className="flex flex-wrap gap-4 sm:gap-6 font-display font-bold text-[11px] sm:text-xs uppercase tracking-wider">
+            <a
+              href="mailto:abdelhamid.bezzot374@gmail.com"
+              className="flex items-center gap-1 hover:text-[#06BC65] transition-colors whitespace-nowrap"
+            >
+              EMAIL <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://github.com/AbdlhamidBezzot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-[#06BC65] transition-colors whitespace-nowrap"
+            >
+              GITHUB <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://linkedin.com/in/abdelhamidbezzot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-[#06BC65] transition-colors whitespace-nowrap"
+            >
+              LINKEDIN <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-6 font-display font-bold text-xs uppercase tracking-wider">
-          <a
-            href="mailto:abdelhamid.bezzot374@gmail.com"
-            className="flex items-center gap-1 hover:text-[#06BC65] transition-colors"
-          >
-            EMAIL <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
-          <a
-            href="https://github.com/AbdlhamidBezzot"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-[#06BC65] transition-colors"
-          >
-            GITHUB <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
-          <a
-            href="https://linkedin.com/in/abdelhamidbezzot"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-[#06BC65] transition-colors"
-          >
-            LINKEDIN <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
-      </div>
+        {/* Divider */}
+        <div className="mt-8 sm:mt-10 border-t border-[#363636]/10" />
 
-      <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-[#363636]/10 flex flex-col sm:flex-row justify-between items-center text-xs font-display font-bold tracking-widest text-[#363636]/60 gap-4">
-        <div>AB ©</div>
-        <div className="flex gap-6">
-          <Link href={`/${locale}`} className="hover:text-[#363636]">
-            {locale === "en" ? "HOME" : "ACCUEIL"}
-          </Link>
-          <Link href={`/${locale}/work`} className="hover:text-[#363636]">
-            {locale === "en" ? "WORK" : "PROJETS"}
-          </Link>
-          <Link href={`/${locale}/about`} className="hover:text-[#363636]">
-            {locale === "en" ? "ABOUT" : "À PROPOS"}
-          </Link>
-          <Link href={`/${locale}/contact`} className="hover:text-[#363636]">
-            {locale === "en" ? "CONTACT" : "CONTACT"}
-          </Link>
+        {/* Bottom row: copyright + nav */}
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] sm:text-xs font-display font-bold tracking-widest text-[#363636]/60">
+          <div className="order-2 sm:order-1">AB ©</div>
+          <div className="order-1 sm:order-2 flex flex-wrap justify-center sm:justify-end gap-4 sm:gap-6">
+            <Link href={`/${locale}`} className="hover:text-[#363636] transition-colors">
+              {locale === "en" ? "HOME" : "ACCUEIL"}
+            </Link>
+            <Link href={`/${locale}/work`} className="hover:text-[#363636] transition-colors">
+              {locale === "en" ? "WORK" : "PROJETS"}
+            </Link>
+            <Link href={`/${locale}/about`} className="hover:text-[#363636] transition-colors">
+              {locale === "en" ? "ABOUT" : "À PROPOS"}
+            </Link>
+            <Link href={`/${locale}/contact`} className="hover:text-[#363636] transition-colors">
+              CONTACT
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

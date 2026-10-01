@@ -33,12 +33,15 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  /* Prevent zoom-out from collapsing layout on mobile */
+  min-width: 320px;
 }
 
 body {
   margin: 0;
   width: 100%;
   max-width: 100%;
+  min-width: 320px;
   overflow-x: hidden;
   background: var(--canvas);
   color: var(--ink);

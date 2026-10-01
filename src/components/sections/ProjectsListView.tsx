@@ -107,14 +107,26 @@ export function ProjectsListView({ locale, projects }: ProjectsListViewProps) {
                     animate={{ opacity: 1, scale: 1, rotate: 2, y: 0 }}
                     exit={{ opacity: 0, scale: 0.8, rotate: -4, y: 20 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className={`hidden lg:block absolute right-36 top-[-40px] z-30 w-72 p-2 rounded-[16px] ${cardBg} shadow-2xl pointer-events-none flex items-center justify-center`}
+                    className={`hidden lg:flex absolute right-36 top-[-40px] z-30 w-72 p-2 rounded-[16px] ${cardBg} shadow-2xl pointer-events-none items-center justify-center`}
                   >
                     <div className="relative w-full h-44 rounded-[12px] overflow-hidden bg-black/10 p-1 flex items-center justify-center">
-                      <DeviceFrame
-                        deviceType={deviceType}
-                        imageUrl={project.imageUrl}
-                        title={title}
-                      />
+                      {deviceType === "phone" ? (
+                        <div className="h-full aspect-[9/19.5] relative flex-shrink-0">
+                          <DeviceFrame
+                            deviceType="phone"
+                            imageUrl={project.imageUrl}
+                            title={title}
+                            className="!h-full !w-full"
+                          />
+                        </div>
+                      ) : (
+                        <DeviceFrame
+                          deviceType="laptop"
+                          imageUrl={project.imageUrl}
+                          title={title}
+                          className="w-full h-full"
+                        />
+                      )}
                     </div>
                   </motion.div>
                 )}

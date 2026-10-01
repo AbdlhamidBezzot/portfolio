@@ -4,19 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Palette, ArrowUpRight } from "lucide-react";
+import { X, ArrowUpRight } from "lucide-react";
 
 interface FloatingControlsProps {
   locale: "en" | "fr";
 }
-
-const ACCENT_PALETTES = [
-  { name: "lime", hex: "#DBF505" },
-  { name: "pink", hex: "#FFBDF7" },
-  { name: "orange", hex: "#F05626" },
-  { name: "teal", hex: "#245767" },
-  { name: "red", hex: "#FF4106" },
-];
 
 export function FloatingControls({ locale }: FloatingControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
