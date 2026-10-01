@@ -101,23 +101,11 @@ export function FeaturedWork({ locale, projects }: FeaturedWorkProps) {
                 onClick={() => setActiveIndex(idx)}
               >
                 <div className="relative w-full h-[200px] sm:h-[250px] md:h-[290px] rounded-[12px] overflow-hidden bg-black/10 mb-4 p-2 flex items-center justify-center">
-                  {deviceType === "phone" ? (
-                    <div className="h-full aspect-[9/19.5] relative flex-shrink-0">
-                      <DeviceFrame
-                        deviceType="phone"
-                        imageUrl={proj.imageUrl}
-                        title={title}
-                        className="!h-full !w-full"
-                      />
-                    </div>
-                  ) : (
-                    <DeviceFrame
-                      deviceType="laptop"
-                      imageUrl={proj.imageUrl}
-                      title={title}
-                      className="w-full h-full"
-                    />
-                  )}
+                  <DeviceFrame
+                    deviceType={deviceType}
+                    imageUrl={proj.imageUrl}
+                    title={title}
+                  />
                 </div>
 
                 <div className="p-2">

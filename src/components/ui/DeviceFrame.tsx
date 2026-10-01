@@ -79,7 +79,7 @@ export function DeviceFrame({
               src={imageUrl}
               alt={title}
               fill
-              className="object-cover object-top"
+              className="object-contain"
               unoptimized
               sizes="(max-width: 640px) 200px, (max-width: 1024px) 300px, 400px"
             />

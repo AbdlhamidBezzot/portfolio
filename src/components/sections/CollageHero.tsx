@@ -166,29 +166,13 @@ export function CollageHero({
                   style={{ zIndex: cfg.zIndex }}
                 >
                   {/* Photo area with DeviceFrame */}
-                  {deviceType === "phone" ? (
-                    /* Phone frame: fixed aspect ratio container */
-                    <div className="relative w-full flex justify-center rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 p-1.5 sm:p-2">
-                      <div style={{ height: "120px" }} className="sm:!h-[180px] md:!h-[210px] aspect-[9/19.5] relative">
-                        <DeviceFrame
-                          deviceType="phone"
-                          imageUrl={imageUrl}
-                          title={cfg.title}
-                          className="!h-full !w-full !max-w-none"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    /* Laptop frame: full width fixed height container */
-                    <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[180px] md:h-[210px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2">
-                      <DeviceFrame
-                        deviceType="laptop"
-                        imageUrl={imageUrl}
-                        title={cfg.title}
-                        className="w-full h-full"
-                      />
-                    </div>
-                  )}
+                  <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2">
+                    <DeviceFrame
+                      deviceType={deviceType}
+                      imageUrl={imageUrl}
+                      title={cfg.title}
+                    />
+                  </div>
 
                   {/* Card Bottom Label */}
                   <div className="flex justify-between items-center px-1 pt-0.5">

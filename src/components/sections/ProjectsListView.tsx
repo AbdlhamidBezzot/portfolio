@@ -110,23 +110,11 @@ export function ProjectsListView({ locale, projects }: ProjectsListViewProps) {
                     className={`hidden lg:flex absolute right-36 top-[-40px] z-30 w-72 p-2 rounded-[16px] ${cardBg} shadow-2xl pointer-events-none items-center justify-center`}
                   >
                     <div className="relative w-full h-44 rounded-[12px] overflow-hidden bg-black/10 p-1 flex items-center justify-center">
-                      {deviceType === "phone" ? (
-                        <div className="h-full aspect-[9/19.5] relative flex-shrink-0">
-                          <DeviceFrame
-                            deviceType="phone"
-                            imageUrl={project.imageUrl}
-                            title={title}
-                            className="!h-full !w-full"
-                          />
-                        </div>
-                      ) : (
-                        <DeviceFrame
-                          deviceType="laptop"
-                          imageUrl={project.imageUrl}
-                          title={title}
-                          className="w-full h-full"
-                        />
-                      )}
+                      <DeviceFrame
+                        deviceType={deviceType}
+                        imageUrl={project.imageUrl}
+                        title={title}
+                      />
                     </div>
                   </motion.div>
                 )}

@@ -33,15 +33,12 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  /* Prevent zoom-out from collapsing layout on mobile */
-  min-width: 320px;
 }
 
 body {
   margin: 0;
   width: 100%;
   max-width: 100%;
-  min-width: 320px;
   overflow-x: hidden;
   background: var(--canvas);
   color: var(--ink);
@@ -253,21 +250,21 @@ a {
   position: fixed;
   top: 24px;
   right: 24px;
-  z-index: 50;
+  z-index: 210;
 }
 
 .floating-bottom-right {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 50;
+  z-index: 210;
 }
 
 /* Fullscreen Menu Overlay */
 .menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 200;
   background: var(--canvas);
   display: flex;
   flex-direction: column;
