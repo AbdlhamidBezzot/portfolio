@@ -232,6 +232,73 @@ a {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
 
+/* Draggable Project Cards Idle Floating Animation (GPU-accelerated pure CSS) */
+@keyframes floatIdleCard0 {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0) rotate(0.8deg);
+  }
+}
+
+@keyframes floatIdleCard1 {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, 5px, 0) rotate(-1deg);
+  }
+}
+
+@keyframes floatIdleCard2 {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) rotate(-0.7deg);
+  }
+}
+
+@keyframes floatIdleCard3 {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, 6px, 0) rotate(0.9deg);
+  }
+}
+
+.card-float-idle {
+  will-change: transform;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.card-float-idle-0 {
+  animation: floatIdleCard0 4.8s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.card-float-idle-1 {
+  animation: floatIdleCard1 5.4s ease-in-out infinite;
+  animation-delay: -1.4s;
+}
+
+.card-float-idle-2 {
+  animation: floatIdleCard2 4.4s ease-in-out infinite;
+  animation-delay: -2.8s;
+}
+
+.card-float-idle-3 {
+  animation: floatIdleCard3 5.1s ease-in-out infinite;
+  animation-delay: -4.1s;
+}
+
+.card-float-idle.is-paused {
+  animation-play-state: paused !important;
+}
+
 /* Accent Color Variations */
 .bg-lime { background-color: var(--lime); color: var(--ink); }
 .bg-pink { background-color: var(--accent-pink); color: var(--ink); }

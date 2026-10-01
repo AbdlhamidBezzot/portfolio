@@ -48,6 +48,7 @@ export function CollageHero({
   const [selectedProject, setSelectedProject] = useState<ModalProject | null>(null);
   const [topZIndex, setTopZIndex] = useState(50);
   const [cardZIndexes, setCardZIndexes] = useState<{ [key: string]: number }>({});
+  const [draggingCards, setDraggingCards] = useState<Set<string>>(new Set());
   const heroRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -55,6 +56,19 @@ export function CollageHero({
     const nextZ = topZIndex + 1;
     setTopZIndex(nextZ);
     setCardZIndexes((prev) => ({ ...prev, [slug]: nextZ }));
+  };
+
+  const startDrag = (slug: string) => {
+    setDraggingCards((prev) => new Set(prev).add(slug));
+    bringToFront(slug);
+  };
+
+  const stopDrag = (slug: string) => {
+    setDraggingCards((prev) => {
+      const next = new Set(prev);
+      next.delete(slug);
+      return next;
+    });
   };
 
   // Close modal when route changes (e.g., user navigates while modal is open)
@@ -81,7 +95,7 @@ export function CollageHero({
     {
       slug: "apollo",
       title: "APOLLO",
-      subtitle: locale === "en" ? "CINEMA AI OS" : "OS CINÉMA IA",
+      subtitle: locale === "en" ? "STREAMING" : "STREAMING",
       bgColor: "bg-[#DBF505]", // Lime
       textColor: "text-[#363636]",
       rotateValue: -12,
@@ -92,7 +106,7 @@ export function CollageHero({
     {
       slug: "bloom",
       title: "BLOOM",
-      subtitle: locale === "en" ? "TIME EXCHANGE" : "TROC DE TEMPS",
+      subtitle: locale === "en" ? "SKILL EXCHANGE" : "ÉCHANGE DE COMPÉTENCES",
       bgColor: "bg-[#FFBDF7]", // Pink
       textColor: "text-[#363636]",
       rotateValue: -4,
@@ -174,6 +188,8 @@ export function CollageHero({
               const deviceType = dbProj?.deviceType || cfg.deviceType;
               const currentZIndex = cardZIndexes[cfg.slug] || cfg.zIndex;
 
+              const isDragging = draggingCards.has(cfg.slug);
+
               return (
                 <motion.div
                   key={cfg.slug}
@@ -186,8 +202,12 @@ export function CollageHero({
                   animate={{ opacity: 1, y: 0, rotate: cfg.rotateValue }}
                   whileHover={{ scale: 1.05, cursor: "grab" }}
                   whileDrag={{ scale: 1.08, zIndex: 150, cursor: "grabbing" }}
-                  onDragStart={() => bringToFront(cfg.slug)}
-                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-grab active:cursor-grabbing touch-none`}
+                  onDragStart={() => startDrag(cfg.slug)}
+                  onDragEnd={() => stopDrag(cfg.slug)}
+                  onPointerDown={() => startDrag(cfg.slug)}
+                  onPointerUp={() => stopDrag(cfg.slug)}
+                  onPointerCancel={() => stopDrag(cfg.slug)}
+                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-grab active:cursor-grabbing touch-none card-float-idle card-float-idle-${idx}${isDragging ? " is-paused" : ""}`}
                   style={{
                     zIndex: currentZIndex,
                     willChange: "transform",
