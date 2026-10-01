@@ -30,10 +30,15 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   background: var(--canvas);
   color: var(--ink);
@@ -68,33 +73,40 @@ a {
   font-weight: 900;
   line-height: 0.88;
   letter-spacing: -0.04em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .display-xxl {
   font-family: var(--font-display);
   text-transform: uppercase;
   font-weight: 900;
-  font-size: clamp(3.2rem, 12vw, 11rem);
+  font-size: clamp(2rem, 11vw, 11rem);
   line-height: 0.82;
   letter-spacing: -0.05em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .display-xl {
   font-family: var(--font-display);
   text-transform: uppercase;
   font-weight: 900;
-  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-size: clamp(1.8rem, 6.5vw, 6rem);
   line-height: 0.85;
   letter-spacing: -0.04em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .display-lg {
   font-family: var(--font-display);
   text-transform: uppercase;
   font-weight: 800;
-  font-size: clamp(1.8rem, 4vw, 3.5rem);
+  font-size: clamp(1.4rem, 4vw, 3.5rem);
   line-height: 0.9;
   letter-spacing: -0.03em;
+  word-break: break-word;
 }
 
 .display-link {
@@ -102,12 +114,13 @@ a {
   text-transform: uppercase;
   font-weight: 900;
   color: var(--ink);
-  font-size: clamp(2.8rem, 8.5vw, 7.5rem);
+  font-size: clamp(1.8rem, 7.5vw, 7.5rem);
   line-height: 0.88;
   letter-spacing: -0.04em;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease;
   display: inline-block;
   cursor: pointer;
+  word-break: break-word;
 }
 
 .display-link:hover {

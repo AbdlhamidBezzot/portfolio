@@ -154,7 +154,7 @@ export function CollageHero({
                   whileHover={{ scale: 1.08, rotate: 0, zIndex: 60, cursor: "pointer" }}
                   transition={{ duration: 0.35, delay: 0.08 * idx }}
                   onClick={() => handleCardClick(cfg.slug)}
-                  className={`relative w-[150px] xs:w-[190px] sm:w-[250px] md:w-[280px] p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] transition-all duration-300 mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-pointer`}
+                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] transition-all duration-300 mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-pointer`}
                   style={{ zIndex: cfg.zIndex }}
                 >
                   {/* Photo area with DeviceFrame */}

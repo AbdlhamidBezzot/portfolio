@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { prisma } from "@/lib/db";
 import { Analytics } from "@vercel/analytics/next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   let title = "Abdelhamid Bezzot — Full-Stack Developer & Applied AI";

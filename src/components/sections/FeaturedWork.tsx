@@ -96,7 +96,7 @@ export function FeaturedWork({ locale, projects }: FeaturedWorkProps) {
             return (
               <motion.div
                 key={proj.id || proj.slug}
-                className={`absolute w-[300px] sm:w-[380px] md:w-[460px] p-4 rounded-[16px] ${cardColor} ${positionClasses} ${rotate} transition-all duration-500 ease-out`}
+                className={`absolute w-[250px] xs:w-[290px] sm:w-[380px] md:w-[460px] max-w-[92vw] p-3 sm:p-4 rounded-[16px] ${cardColor} ${positionClasses} ${rotate} transition-all duration-500 ease-out`}
                 style={{ zIndex }}
                 onClick={() => setActiveIndex(idx)}
               >
