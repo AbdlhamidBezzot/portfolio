@@ -270,9 +270,9 @@ a {
 }
 
 .card-float-idle {
-  will-change: transform;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
+  /* No will-change here: avoid creating a new compositing context on the
+     wrapper that could break Framer Motion's dragConstraints boundary calc.
+     GPU promotion happens naturally via translate3d inside the @keyframes. */
 }
 
 .card-float-idle-0 {
@@ -295,9 +295,6 @@ a {
   animation-delay: -4.1s;
 }
 
-.card-float-idle.is-paused {
-  animation-play-state: paused !important;
-}
 
 /* Accent Color Variations */
 .bg-lime { background-color: var(--lime); color: var(--ink); }

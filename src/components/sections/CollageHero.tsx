@@ -48,7 +48,6 @@ export function CollageHero({
   const [selectedProject, setSelectedProject] = useState<ModalProject | null>(null);
   const [topZIndex, setTopZIndex] = useState(50);
   const [cardZIndexes, setCardZIndexes] = useState<{ [key: string]: number }>({});
-  const [draggingCards, setDraggingCards] = useState<Set<string>>(new Set());
   const heroRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -56,19 +55,6 @@ export function CollageHero({
     const nextZ = topZIndex + 1;
     setTopZIndex(nextZ);
     setCardZIndexes((prev) => ({ ...prev, [slug]: nextZ }));
-  };
-
-  const startDrag = (slug: string) => {
-    setDraggingCards((prev) => new Set(prev).add(slug));
-    bringToFront(slug);
-  };
-
-  const stopDrag = (slug: string) => {
-    setDraggingCards((prev) => {
-      const next = new Set(prev);
-      next.delete(slug);
-      return next;
-    });
   };
 
   // Close modal when route changes (e.g., user navigates while modal is open)
@@ -95,7 +81,7 @@ export function CollageHero({
     {
       slug: "apollo",
       title: "APOLLO",
-      subtitle: locale === "en" ? "STREAMING" : "STREAMING",
+      subtitle: "STREAMING",
       bgColor: "bg-[#DBF505]", // Lime
       textColor: "text-[#363636]",
       rotateValue: -12,
@@ -188,63 +174,65 @@ export function CollageHero({
               const deviceType = dbProj?.deviceType || cfg.deviceType;
               const currentZIndex = cardZIndexes[cfg.slug] || cfg.zIndex;
 
-              const isDragging = draggingCards.has(cfg.slug);
-
               return (
-                <motion.div
+                /*
+                 * TWO-LAYER SEPARATION — fixes the transform conflict:
+                 *   Outer <div>       → CSS @keyframes idle float ONLY (no drag, no Framer)
+                 *   Inner <motion.div> → Framer drag ONLY (no CSS animation class)
+                 * Each element owns exactly one transform source → zero conflict.
+                 */
+                <div
                   key={cfg.slug}
-                  drag
-                  dragConstraints={heroRef}
-                  dragElastic={0.05}
-                  dragMomentum={false}
-                  dragSnapToOrigin={false}
-                  initial={{ opacity: 0, y: 30, rotate: cfg.rotateValue }}
-                  animate={{ opacity: 1, y: 0, rotate: cfg.rotateValue }}
-                  whileHover={{ scale: 1.05, cursor: "grab" }}
-                  whileDrag={{ scale: 1.08, zIndex: 150, cursor: "grabbing" }}
-                  onDragStart={() => startDrag(cfg.slug)}
-                  onDragEnd={() => stopDrag(cfg.slug)}
-                  onPointerDown={() => startDrag(cfg.slug)}
-                  onPointerUp={() => stopDrag(cfg.slug)}
-                  onPointerCancel={() => stopDrag(cfg.slug)}
-                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-grab active:cursor-grabbing touch-none card-float-idle card-float-idle-${idx}${isDragging ? " is-paused" : ""}`}
-                  style={{
-                    zIndex: currentZIndex,
-                    willChange: "transform",
-                  }}
+                  className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-6 lg:-mx-8`}
+                  style={{ zIndex: currentZIndex, position: "relative" }}
                 >
-                  {/* Photo area with DeviceFrame */}
-                  <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
-                    <DeviceFrame
-                      deviceType={deviceType}
-                      imageUrl={imageUrl}
-                      title={cfg.title}
-                    />
-                  </div>
-
-                  {/* Card Bottom Label */}
-                  <div className="flex justify-between items-center px-1 pt-0.5">
-                    <div>
-                      <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none">
-                        {cfg.title}
-                      </div>
-                      <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none">
-                        {cfg.subtitle}
-                      </div>
+                  <motion.div
+                    drag
+                    dragConstraints={heroRef}
+                    dragElastic={0.05}
+                    dragMomentum={false}
+                    dragSnapToOrigin={false}
+                    initial={{ opacity: 0, y: 30, rotate: cfg.rotateValue }}
+                    animate={{ opacity: 1, y: 0, rotate: cfg.rotateValue }}
+                    whileHover={{ scale: 1.05, cursor: "grab" }}
+                    whileDrag={{ scale: 1.08, zIndex: 150, cursor: "grabbing" }}
+                    onDragStart={() => bringToFront(cfg.slug)}
+                    className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none`}
+                    style={{ willChange: "transform" }}
+                  >
+                    {/* Photo area with DeviceFrame */}
+                    <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
+                      <DeviceFrame
+                        deviceType={deviceType}
+                        imageUrl={imageUrl}
+                        title={cfg.title}
+                      />
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(cfg.slug);
-                      }}
-                      aria-label={`Open ${cfg.title} details`}
-                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer z-10 pointer-events-auto"
-                    >
-                      <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </button>
-                  </div>
-                </motion.div>
+
+                    {/* Card Bottom Label */}
+                    <div className="flex justify-between items-center px-1 pt-0.5">
+                      <div>
+                        <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none">
+                          {cfg.title}
+                        </div>
+                        <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none">
+                          {cfg.subtitle}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(cfg.slug);
+                        }}
+                        aria-label={`Open ${cfg.title} details`}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer z-10 pointer-events-auto"
+                      >
+                        <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
               );
             })}
           </div>
