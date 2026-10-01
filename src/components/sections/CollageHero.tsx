@@ -474,8 +474,15 @@ export function CollageHero({
           transition={{ duration: 0.5 }}
           className="w-full text-center mt-2 sm:mt-4 mb-2 md:mb-4 select-none z-10 px-2 max-w-full overflow-hidden"
         >
-          <h1 className="display-xxl tracking-tighter text-[#363636] leading-[0.82] max-w-full break-normal">
-            {name}
+          <h1 className="display-xxl tracking-tighter text-[#363636] leading-[0.82] max-w-full text-center">
+            {name.includes(" ") ? (
+              <>
+                <span className="block">{name.split(" ")[0]}</span>
+                <span className="block">{name.split(" ").slice(1).join(" ")}</span>
+              </>
+            ) : (
+              name
+            )}
           </h1>
         </motion.div>
 
