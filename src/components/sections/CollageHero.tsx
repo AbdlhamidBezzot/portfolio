@@ -72,26 +72,29 @@ function DraggableCard({
   bringToFront,
   handleCardClick,
 }: DraggableCardProps) {
-  // 1. Current position stored in ref to prevent stale closures (Cause 4)
+  // 1. Current card position stored in ref (no stale closure, survives re-renders)
   const posRef = useRef({ x: 0, y: 0 });
-  const [pos, setPos] = useState({ x: 0, y: 0 });
 
-  // 2. Drag tracking state stored in refs
+  // 2. Drag tracking state stored strictly in refs
+  const offsetRef = useRef({ x: 0, y: 0 });
   const startPointerRef = useRef({ x: 0, y: 0 });
-  const startPosRef = useRef({ x: 0, y: 0 });
+  const boundsRef = useRef<{ minX: number; maxX: number; minY: number; maxY: number } | null>(null);
   const isDraggingRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hasDraggedRef = useRef(false);
 
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Helper to reliably stop drag and release pointer capture in ALL scenarios (Causes 2 & 3)
+  // Helper to stop drag cleanly and apply drop animation
   const stopDrag = useCallback((e?: React.PointerEvent | PointerEvent) => {
     if (!isDraggingRef.current && activePointerIdRef.current === null) return;
 
     isDraggingRef.current = false;
-    setIsDragging(false);
+
+    // Apply drop transition & final scale back to 1 via direct DOM manipulation
+    if (cardRef.current) {
+      cardRef.current.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
+      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
+    }
 
     // Release pointer capture safely (Cause 2)
     if (activePointerIdRef.current !== null && cardRef.current) {
@@ -99,14 +102,12 @@ function DraggableCard({
         if (cardRef.current.hasPointerCapture(activePointerIdRef.current)) {
           cardRef.current.releasePointerCapture(activePointerIdRef.current);
         }
-      } catch (_) {
-        // Safe fallback if pointer capture was automatically released
-      }
+      } catch (_) {}
       activePointerIdRef.current = null;
     }
-  }, []);
+  }, [cfg.rotateValue]);
 
-  // Global event safety net for pointerup / pointercancel / blur outside window (Cause 3)
+  // Global safety net for pointerup/pointercancel/blur (Cause 3)
   useEffect(() => {
     const handleGlobalPointerUp = (e?: Event) => {
       if (isDraggingRef.current) {
@@ -133,46 +134,18 @@ function DraggableCard({
     bringToFront(cfg.slug);
 
     hasDraggedRef.current = false;
-
-    // Reset dragging flag cleanly before starting (Cause 3)
     isDraggingRef.current = true;
-    setIsDragging(true);
 
-    // Record initial pointer coordinates
-    startPointerRef.current = { x: e.clientX, y: e.clientY };
+    // Exact offset between cursor and card position (Point 6: ZERO click jump)
+    const pointerX = e.clientX;
+    const pointerY = e.clientY;
+    startPointerRef.current = { x: pointerX, y: pointerY };
+    offsetRef.current = {
+      x: pointerX - posRef.current.x,
+      y: pointerY - posRef.current.y,
+    };
 
-    // Record reference position from current posRef (Cause 1 & Cause 4)
-    startPosRef.current = { x: posRef.current.x, y: posRef.current.y };
-
-    // Acquire pointer capture (Cause 2)
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-      activePointerIdRef.current = e.pointerId;
-    } catch (_) {
-      activePointerIdRef.current = null;
-    }
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-
-    // Verify matching pointer ID if pointer capture is active
-    if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) {
-      return;
-    }
-
-    const deltaX = e.clientX - startPointerRef.current.x;
-    const deltaY = e.clientY - startPointerRef.current.y;
-
-    // Mark as drag if moved more than 3px
-    if (Math.hypot(deltaX, deltaY) > 3) {
-      hasDraggedRef.current = true;
-    }
-
-    let newX = startPosRef.current.x + deltaX;
-    let newY = startPosRef.current.y + deltaY;
-
-    // Boundary constraint relative to hero container
+    // Pre-calculate container bounds ONCE at pointerdown (Point 4: zero getBoundingClientRect in move loop)
     if (heroRef.current && cardRef.current) {
       const heroRect = heroRef.current.getBoundingClientRect();
       const cardRect = cardRef.current.getBoundingClientRect();
@@ -187,18 +160,63 @@ function DraggableCard({
 
       const cardWidth = cardRect.width;
 
-      const minX = heroRect.left - baseLeft - cardWidth * 0.35;
-      const maxX = heroRect.right - baseRight + cardWidth * 0.35;
-      const minY = heroRect.top - baseTop - 30;
-      const maxY = heroRect.bottom - baseBottom + 30;
-
-      newX = Math.max(minX, Math.min(maxX, newX));
-      newY = Math.max(minY, Math.min(maxY, newY));
+      boundsRef.current = {
+        minX: heroRect.left - baseLeft - cardWidth * 0.35,
+        maxX: heroRect.right - baseRight + cardWidth * 0.35,
+        minY: heroRect.top - baseTop - 30,
+        maxY: heroRect.bottom - baseBottom + 30,
+      };
+    } else {
+      boundsRef.current = null;
     }
 
-    // Immediately update position ref so subsequent pointerdown reads exact position (Cause 1)
+    // Disable transitions during active drag & apply drag scale (Point 2 & Point 1)
+    if (cardRef.current) {
+      cardRef.current.style.transition = "none";
+      cardRef.current.style.willChange = "transform";
+      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
+    }
+
+    // Acquire pointer capture (Cause 2)
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      activePointerIdRef.current = e.pointerId;
+    } catch (_) {
+      activePointerIdRef.current = null;
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+
+    if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) {
+      return;
+    }
+
+    const deltaX = e.clientX - startPointerRef.current.x;
+    const deltaY = e.clientY - startPointerRef.current.y;
+
+    if (Math.hypot(deltaX, deltaY) > 3) {
+      hasDraggedRef.current = true;
+    }
+
+    // Calculate new position using fixed offset (Point 6)
+    let newX = e.clientX - offsetRef.current.x;
+    let newY = e.clientY - offsetRef.current.y;
+
+    // Apply pre-calculated boundary clamps (Point 4)
+    if (boundsRef.current) {
+      newX = Math.max(boundsRef.current.minX, Math.min(boundsRef.current.maxX, newX));
+      newY = Math.max(boundsRef.current.minY, Math.min(boundsRef.current.maxY, newY));
+    }
+
+    // Record position in ref (Cause 1 & 4)
     posRef.current = { x: newX, y: newY };
-    setPos({ x: newX, y: newY });
+
+    // Direct DOM mutation for 60/120fps butter smooth movement without React re-renders (Point 1 & 2 & 5)
+    if (cardRef.current) {
+      cardRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -211,6 +229,20 @@ function DraggableCard({
 
   const handleLostPointerCapture = (e: React.PointerEvent<HTMLDivElement>) => {
     stopDrag(e);
+  };
+
+  const handleMouseEnter = () => {
+    if (!isDraggingRef.current && cardRef.current) {
+      cardRef.current.style.transition = "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)";
+      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.05)`;
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDraggingRef.current && cardRef.current) {
+      cardRef.current.style.transition = "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)";
+      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
+    }
   };
 
   const handleCardClickEvent = (e: React.MouseEvent) => {
@@ -234,23 +266,14 @@ function DraggableCard({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
         onLostPointerCapture={handleLostPointerCapture}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onClick={handleCardClickEvent}
-        initial={{ opacity: 0, y: 30, rotate: cfg.rotateValue }}
-        animate={{
-          opacity: 1,
-          x: pos.x,
-          y: pos.y,
-          rotate: cfg.rotateValue,
-          scale: isDragging ? 1.08 : 1,
-        }}
-        transition={
-          isDragging
-            ? { type: "just" }
-            : { type: "spring", stiffness: 400, damping: 28 }
-        }
-        whileHover={!isDragging ? { scale: 1.05 } : undefined}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
         className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none`}
-        style={{ willChange: "transform" }}
+        style={{ willChange: "transform", transform: `translate3d(0px, 0px, 0px) rotate(${cfg.rotateValue}deg)` }}
       >
         {/* Photo area with DeviceFrame */}
         <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
