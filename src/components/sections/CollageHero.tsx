@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -46,7 +46,16 @@ export function CollageHero({
   projects = [],
 }: CollageHeroProps) {
   const [selectedProject, setSelectedProject] = useState<ModalProject | null>(null);
+  const [topZIndex, setTopZIndex] = useState(50);
+  const [cardZIndexes, setCardZIndexes] = useState<{ [key: string]: number }>({});
+  const heroRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  const bringToFront = (slug: string) => {
+    const nextZ = topZIndex + 1;
+    setTopZIndex(nextZ);
+    setCardZIndexes((prev) => ({ ...prev, [slug]: nextZ }));
+  };
 
   // Close modal when route changes (e.g., user navigates while modal is open)
   useEffect(() => {
@@ -140,7 +149,10 @@ export function CollageHero({
 
   return (
     <>
-      <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-4 pb-16 overflow-hidden flex flex-col items-center">
+      <section
+        ref={heroRef}
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-4 pb-16 overflow-hidden flex flex-col items-center"
+      >
         {/* Name Display positioned closer to cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -153,24 +165,34 @@ export function CollageHero({
           </h1>
         </motion.div>
 
-        {/* Scattered Collage Row (Spencer Gabor Style) */}
+        {/* Scattered Collage Row (Spencer Gabor Style — Draggable Fridge Magnets) */}
         <div className="relative w-full my-4 sm:my-10 min-h-[360px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-2 sm:py-4">
           <div className="relative w-full max-w-5xl flex flex-wrap md:flex-nowrap items-center justify-center gap-3 sm:gap-6 md:gap-0 px-2">
             {cardConfigs.map((cfg, idx) => {
               const dbProj = projects.find((p) => p.slug.toLowerCase() === cfg.slug.toLowerCase());
               const imageUrl = dbProj?.imageUrl || cfg.image;
               const deviceType = dbProj?.deviceType || cfg.deviceType;
+              const currentZIndex = cardZIndexes[cfg.slug] || cfg.zIndex;
 
               return (
                 <motion.div
                   key={cfg.slug}
+                  drag
+                  dragConstraints={heroRef}
+                  dragElastic={0.05}
+                  dragMomentum={false}
+                  dragSnapToOrigin={false}
                   initial={{ opacity: 0, y: 30, rotate: cfg.rotateValue }}
                   animate={{ opacity: 1, y: 0, rotate: cfg.rotateValue }}
-                  whileHover={{ scale: 1.08, rotate: 0, zIndex: 60, cursor: "pointer" }}
-                  transition={{ duration: 0.35, delay: 0.08 * idx }}
-                  onClick={() => handleCardClick(cfg.slug)}
-                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] transition-all duration-300 mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-pointer`}
-                  style={{ zIndex: cfg.zIndex }}
+                  whileHover={{ scale: 1.05, cursor: "grab" }}
+                  whileDrag={{ scale: 1.08, zIndex: 150, cursor: "grabbing" }}
+                  onDragStart={() => bringToFront(cfg.slug)}
+                  onTap={() => handleCardClick(cfg.slug)}
+                  className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-grab active:cursor-grabbing touch-none`}
+                  style={{
+                    zIndex: currentZIndex,
+                    willChange: "transform",
+                  }}
                 >
                   {/* Photo area with DeviceFrame */}
                   <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2">
