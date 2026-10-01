@@ -2,10 +2,10 @@ import { LocalizedProjectDetail } from "@/components/LocalizedProjectDetail";
 
 export const dynamic = "force-dynamic";
 
-export default function EnglishProjectPage({
+export default function FrenchProjectDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  return <LocalizedProjectDetail locale="en" slug={params.slug} />;
+  return <LocalizedProjectDetail locale="fr" slug={params.slug} />;
 }

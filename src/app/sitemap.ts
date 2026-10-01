@@ -25,17 +25,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   /** Static public routes — one entry per locale */
   const staticRoutes: MetadataRoute.Sitemap = [
     // Root (redirects to /en, included for crawlers)
-    { url: `${baseUrl}/`,          lastModified: now },
+    { url: `${baseUrl}/`,              lastModified: now },
     // English pages
-    { url: `${baseUrl}/en`,        lastModified: now },
-    { url: `${baseUrl}/en/projects`, lastModified: now },
+    { url: `${baseUrl}/en`,            lastModified: now },
+    { url: `${baseUrl}/en/work`,       lastModified: now },
+    { url: `${baseUrl}/en/about`,      lastModified: now },
+    { url: `${baseUrl}/en/contact`,    lastModified: now },
+    { url: `${baseUrl}/en/projects`,   lastModified: now },
     // French pages
-    { url: `${baseUrl}/fr`,        lastModified: now },
-    { url: `${baseUrl}/fr/projects`, lastModified: now },
+    { url: `${baseUrl}/fr`,            lastModified: now },
+    { url: `${baseUrl}/fr/work`,       lastModified: now },
+    { url: `${baseUrl}/fr/about`,      lastModified: now },
+    { url: `${baseUrl}/fr/contact`,    lastModified: now },
+    { url: `${baseUrl}/fr/projects`,   lastModified: now },
   ];
 
-  /** Dynamic project case-study pages */
+  /** Dynamic project case-study pages — both /work/ and legacy /projects/ paths */
   const projectRoutes: MetadataRoute.Sitemap = projects.flatMap((p) => [
+    { url: `${baseUrl}/en/work/${p.slug}`,     lastModified: p.updatedAt ?? now },
+    { url: `${baseUrl}/fr/work/${p.slug}`,     lastModified: p.updatedAt ?? now },
     { url: `${baseUrl}/en/projects/${p.slug}`, lastModified: p.updatedAt ?? now },
     { url: `${baseUrl}/fr/projects/${p.slug}`, lastModified: p.updatedAt ?? now },
   ]);

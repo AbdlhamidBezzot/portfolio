@@ -9,7 +9,7 @@ export const contentType = "image/png";
 
 export default async function OGImage() {
   let name = "Abdelhamid Bezzot";
-  let role = "Développeur full-stack · IA appliquée";
+  let role = "Développeur full-stack · AI Engineer";
 
   try {
     const s = await prisma.siteSettings.findUnique({ where: { id: "main" } });
@@ -68,7 +68,7 @@ export default async function OGImage() {
               letterSpacing: "-0.04em",
             }}
           >
-            AB_
+            AB
           </span>
           <span
             style={{
@@ -136,7 +136,7 @@ export default async function OGImage() {
               display: "flex",
             }}
           >
-            Fès, Maroc
+            Portfolio 2026
           </span>
           <span
             style={{

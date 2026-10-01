@@ -1,1 +1,7 @@
-import{redirect}from"next/navigation";export default function Projects(){redirect("/en#projects")}
+import { LocalizedWork } from "@/components/LocalizedWork";
+
+export const dynamic = "force-dynamic";
+
+export default function EnglishProjectsPage() {
+  return <LocalizedWork locale="en" />;
+}

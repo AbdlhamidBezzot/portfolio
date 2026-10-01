@@ -2,7 +2,7 @@ import { LocalizedProjectDetail } from "@/components/LocalizedProjectDetail";
 
 export const dynamic = "force-dynamic";
 
-export default function EnglishProjectPage({
+export default function EnglishProjectDetailPage({
   params,
 }: {
   params: { slug: string };

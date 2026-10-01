@@ -118,6 +118,7 @@ model Project {
   statusFr      String   @default("")
   tags          String[]
   imageUrl      String?
+  deviceType    String   @default("laptop")
   liveUrl       String?
   githubUrl     String?
   order         Int      @default(0)
