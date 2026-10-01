@@ -139,8 +139,8 @@ export function CollageHero({
         </motion.div>
 
         {/* Scattered Collage Row (Spencer Gabor Style) */}
-        <div className="relative w-full my-6 sm:my-10 min-h-[380px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-4">
-          <div className="relative w-full max-w-5xl flex flex-wrap md:flex-nowrap items-center justify-center gap-4 md:gap-0">
+        <div className="relative w-full my-4 sm:my-10 min-h-[360px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-2 sm:py-4">
+          <div className="relative w-full max-w-5xl flex flex-wrap md:flex-nowrap items-center justify-center gap-3 sm:gap-6 md:gap-0 px-2">
             {cardConfigs.map((cfg, idx) => {
               const dbProj = projects.find((p) => p.slug.toLowerCase() === cfg.slug.toLowerCase());
               const imageUrl = dbProj?.imageUrl || cfg.image;
@@ -149,16 +149,16 @@ export function CollageHero({
               return (
                 <motion.div
                   key={cfg.slug}
-                  initial={{ opacity: 0, y: 40, rotate: cfg.rotateValue }}
+                  initial={{ opacity: 0, y: 30, rotate: cfg.rotateValue }}
                   animate={{ opacity: 1, y: 0, rotate: cfg.rotateValue }}
                   whileHover={{ scale: 1.08, rotate: 0, zIndex: 60, cursor: "pointer" }}
                   transition={{ duration: 0.35, delay: 0.08 * idx }}
                   onClick={() => handleCardClick(cfg.slug)}
-                  className={`relative w-[230px] sm:w-[270px] md:w-[290px] p-3 sm:p-4 rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_18px_40px_rgba(0,0,0,0.22)] transition-all duration-300 md:-mx-6 lg:-mx-8 select-none group cursor-pointer`}
+                  className={`relative w-[150px] xs:w-[190px] sm:w-[250px] md:w-[280px] p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] transition-all duration-300 mx-0 md:-mx-6 lg:-mx-8 select-none group cursor-pointer`}
                   style={{ zIndex: cfg.zIndex }}
                 >
                   {/* Photo area with DeviceFrame */}
-                  <div className="relative w-full h-[180px] sm:h-[220px] md:h-[240px] rounded-[16px] overflow-hidden bg-black/10 mb-3 border border-black/5 flex items-center justify-center p-2">
+                  <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2">
                     <DeviceFrame
                       deviceType={deviceType}
                       imageUrl={imageUrl}
@@ -167,17 +167,17 @@ export function CollageHero({
                   </div>
 
                   {/* Card Bottom Label */}
-                  <div className="flex justify-between items-center px-1 pt-1">
+                  <div className="flex justify-between items-center px-1 pt-0.5">
                     <div>
-                      <div className="font-display font-black text-lg sm:text-xl md:text-2xl tracking-tight leading-none">
+                      <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none">
                         {cfg.title}
                       </div>
-                      <div className="font-display font-bold text-[10px] sm:text-[11px] opacity-80 mt-1 uppercase">
+                      <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none">
                         {cfg.subtitle}
                       </div>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                      <ArrowDownRight className="w-4 h-4" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                      <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                   </div>
                 </motion.div>

@@ -143,7 +143,7 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
             {/* Bottom Strip inside Overlay */}
             <div className="pt-8 border-t border-[#363636]/10 flex flex-wrap justify-between items-center gap-4 text-xs font-display font-bold tracking-widest text-[#363636]/70">
               <div>ABDELHAMID.BEZZOT374@GMAIL.COM</div>
-              <div>ALL RIGHTS RESERVED 2026 AB</div>
+              <div>AB ©</div>
             </div>
           </motion.div>
         )}

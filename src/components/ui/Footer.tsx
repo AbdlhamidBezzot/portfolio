@@ -47,7 +47,7 @@ export function Footer({ locale }: FooterProps) {
       </div>
 
       <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-[#363636]/10 flex flex-col sm:flex-row justify-between items-center text-xs font-display font-bold tracking-widest text-[#363636]/60 gap-4">
-        <div>ALL RIGHTS RESERVED 2026 AB</div>
+        <div>AB ©</div>
         <div className="flex gap-6">
           <Link href={`/${locale}`} className="hover:text-[#363636]">
             {locale === "en" ? "HOME" : "ACCUEIL"}

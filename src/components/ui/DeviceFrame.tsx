@@ -17,28 +17,31 @@ export function DeviceFrame({
 }: DeviceFrameProps) {
   if (deviceType === "phone") {
     return (
-      <div className={`relative h-full aspect-[9/18] rounded-[24px] sm:rounded-[30px] border-[5px] sm:border-[6px] border-[#222222] shadow-2xl bg-black overflow-hidden flex flex-col justify-between ${className}`}>
-        {/* Top Notch / Island */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-3 bg-[#222222] rounded-full z-20 flex items-center justify-center">
-          <div className="w-2 h-2 rounded-full bg-black/60" />
+      <div className={`relative h-full max-h-full aspect-[9/18.5] rounded-[20px] sm:rounded-[28px] border-[4px] sm:border-[6px] border-[#1E1E1E] shadow-2xl bg-black overflow-hidden flex flex-col justify-between mx-auto ${className}`}>
+        {/* Dynamic Island / Top Speaker Notch */}
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 sm:w-16 h-2.5 sm:h-3 bg-[#1E1E1E] rounded-full z-20 flex items-center justify-center">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#0F0F0F]" />
         </div>
 
-        {/* Screen Image */}
-        <div className="relative w-full h-full">
+        {/* Smartphone Screen View */}
+        <div className="relative w-full h-full flex-1 overflow-hidden">
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={title}
               fill
-              className="object-cover"
+              className="object-cover object-top"
               unoptimized
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-[#181818] text-white font-display font-black text-xs">
+            <div className="w-full h-full flex items-center justify-center bg-[#141414] text-white/70 font-display font-black text-xs uppercase p-2 text-center">
               {title}
             </div>
           )}
         </div>
+
+        {/* Bottom Home Indicator Bar */}
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/40 rounded-full z-20" />
       </div>
     );
   }
