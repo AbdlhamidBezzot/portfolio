@@ -72,10 +72,14 @@ function DraggableCard({
   bringToFront,
   handleCardClick,
 }: DraggableCardProps) {
-  // 1. Current card position stored in ref (no stale closure, survives re-renders)
-  const posRef = useRef({ x: 0, y: 0 });
+  // Official React state position — synchronized ONLY at pointerup
+  const [pos, setPos] = useState({ x: 0, y: 0 });
 
-  // 2. Drag tracking state stored strictly in refs
+  // State to control idle float animation on outer wrapper
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Refs for tracking position and gesture state without stale closure or re-render lag
+  const posRef = useRef({ x: 0, y: 0 });
   const offsetRef = useRef({ x: 0, y: 0 });
   const startPointerRef = useRef({ x: 0, y: 0 });
   const boundsRef = useRef<{ minX: number; maxX: number; minY: number; maxY: number } | null>(null);
@@ -84,19 +88,25 @@ function DraggableCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const hasDraggedRef = useRef(false);
 
-  // Helper to stop drag cleanly and apply drop animation
-  const stopDrag = useCallback((e?: React.PointerEvent | PointerEvent) => {
+  // Stop drag cleanly & sync final position to React state (pointerup)
+  const stopDrag = useCallback(() => {
     if (!isDraggingRef.current && activePointerIdRef.current === null) return;
 
     isDraggingRef.current = false;
+    setIsDragging(false);
 
-    // Apply drop transition & final scale back to 1 via direct DOM manipulation
+    // Synchronize final position into React state ONCE
+    const finalX = posRef.current.x;
+    const finalY = posRef.current.y;
+    setPos({ x: finalX, y: finalY });
+
+    // Apply drop transition & final resting transform on DOM element
     if (cardRef.current) {
       cardRef.current.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
-      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
+      cardRef.current.style.transform = `translate3d(${finalX}px, ${finalY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
     }
 
-    // Release pointer capture safely (Cause 2)
+    // Release pointer capture safely
     if (activePointerIdRef.current !== null && cardRef.current) {
       try {
         if (cardRef.current.hasPointerCapture(activePointerIdRef.current)) {
@@ -107,11 +117,11 @@ function DraggableCard({
     }
   }, [cfg.rotateValue]);
 
-  // Global safety net for pointerup/pointercancel/blur (Cause 3)
+  // Global window listeners safety net for pointerup / pointercancel / blur
   useEffect(() => {
-    const handleGlobalPointerUp = (e?: Event) => {
+    const handleGlobalPointerUp = () => {
       if (isDraggingRef.current) {
-        stopDrag(e as PointerEvent | undefined);
+        stopDrag();
       }
     };
 
@@ -127,42 +137,42 @@ function DraggableCard({
   }, [stopDrag]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Only accept primary button (left mouse click or touch)
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
-    // Bring card to front immediately
     bringToFront(cfg.slug);
 
     hasDraggedRef.current = false;
     isDraggingRef.current = true;
+    setIsDragging(true);
 
-    // Exact offset between cursor and card position (Point 6: ZERO click jump)
     const pointerX = e.clientX;
     const pointerY = e.clientY;
     startPointerRef.current = { x: pointerX, y: pointerY };
+
+    // Calculate exact cursor offset from current card position (NO JUMP ON CLICK!)
     offsetRef.current = {
       x: pointerX - posRef.current.x,
       y: pointerY - posRef.current.y,
     };
 
-    // Pre-calculate container bounds ONCE at pointerdown (Point 4: zero getBoundingClientRect in move loop)
+    // Pre-calculate hero container bounds ONCE at pointerdown
     if (heroRef.current && cardRef.current) {
       const heroRect = heroRef.current.getBoundingClientRect();
       const cardRect = cardRef.current.getBoundingClientRect();
 
-      const currentOffsetX = posRef.current.x;
-      const currentOffsetY = posRef.current.y;
+      const curX = posRef.current.x;
+      const curY = posRef.current.y;
 
-      const baseLeft = cardRect.left - currentOffsetX;
-      const baseRight = cardRect.right - currentOffsetX;
-      const baseTop = cardRect.top - currentOffsetY;
-      const baseBottom = cardRect.bottom - currentOffsetY;
+      const baseLeft = cardRect.left - curX;
+      const baseRight = cardRect.right - curX;
+      const baseTop = cardRect.top - curY;
+      const baseBottom = cardRect.bottom - curY;
 
-      const cardWidth = cardRect.width;
+      const cardW = cardRect.width;
 
       boundsRef.current = {
-        minX: heroRect.left - baseLeft - cardWidth * 0.35,
-        maxX: heroRect.right - baseRight + cardWidth * 0.35,
+        minX: heroRect.left - baseLeft - cardW * 0.35,
+        maxX: heroRect.right - baseRight + cardW * 0.35,
         minY: heroRect.top - baseTop - 30,
         maxY: heroRect.bottom - baseBottom + 30,
       };
@@ -170,14 +180,13 @@ function DraggableCard({
       boundsRef.current = null;
     }
 
-    // Disable transitions during active drag & apply drag scale (Point 2 & Point 1)
+    // Disable CSS transition during active drag & apply scale(1.08)
     if (cardRef.current) {
       cardRef.current.style.transition = "none";
       cardRef.current.style.willChange = "transform";
       cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
     }
 
-    // Acquire pointer capture (Cause 2)
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
       activePointerIdRef.current = e.pointerId;
@@ -200,35 +209,34 @@ function DraggableCard({
       hasDraggedRef.current = true;
     }
 
-    // Calculate new position using fixed offset (Point 6)
+    // New position = cursor position - initial offset
     let newX = e.clientX - offsetRef.current.x;
     let newY = e.clientY - offsetRef.current.y;
 
-    // Apply pre-calculated boundary clamps (Point 4)
+    // Apply pre-calculated boundary clamps
     if (boundsRef.current) {
       newX = Math.max(boundsRef.current.minX, Math.min(boundsRef.current.maxX, newX));
       newY = Math.max(boundsRef.current.minY, Math.min(boundsRef.current.maxY, newY));
     }
 
-    // Record position in ref (Cause 1 & 4)
     posRef.current = { x: newX, y: newY };
 
-    // Direct DOM mutation for 60/120fps butter smooth movement without React re-renders (Point 1 & 2 & 5)
+    // Update DOM transform directly without React re-render per pixel
     if (cardRef.current) {
       cardRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
     }
   };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    stopDrag(e);
+  const handlePointerUp = () => {
+    stopDrag();
   };
 
-  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    stopDrag(e);
+  const handlePointerCancel = () => {
+    stopDrag();
   };
 
-  const handleLostPointerCapture = (e: React.PointerEvent<HTMLDivElement>) => {
-    stopDrag(e);
+  const handleLostPointerCapture = () => {
+    stopDrag();
   };
 
   const handleMouseEnter = () => {
@@ -255,11 +263,21 @@ function DraggableCard({
   };
 
   return (
+    /*
+     * IMBRICATED ARCHITECTURE:
+     *   Outer <div>: Carries CSS @keyframes idle float animation ONLY.
+     *                Pauses animation when isDragging is true.
+     *   Inner <div>: Carries JS-managed drag transform ONLY.
+     */
     <div
       className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-6 lg:-mx-8`}
-      style={{ zIndex: currentZIndex, position: "relative" }}
+      style={{
+        zIndex: currentZIndex,
+        position: "relative",
+        animationPlayState: isDragging ? "paused" : "running",
+      }}
     >
-      <motion.div
+      <div
         ref={cardRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -269,11 +287,12 @@ function DraggableCard({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleCardClickEvent}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none`}
-        style={{ willChange: "transform", transform: `translate3d(0px, 0px, 0px) rotate(${cfg.rotateValue}deg)` }}
+        style={{
+          willChange: "transform",
+          transform: `translate3d(${pos.x}px, ${pos.y}px, 0px) rotate(${cfg.rotateValue}deg)`,
+          transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
       >
         {/* Photo area with DeviceFrame */}
         <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
@@ -307,7 +326,7 @@ function DraggableCard({
             <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
