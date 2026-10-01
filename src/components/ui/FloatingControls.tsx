@@ -14,14 +14,23 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
+  // Helper to dispatch global preview close event
+  const closeAllPreviews = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("portfolio-close-previews"));
+    }
+  };
+
   // Close menu when route changes
   useEffect(() => {
     setIsOpen(false);
+    closeAllPreviews();
   }, [pathname]);
 
   // Lock scroll when overlay menu is open
   useEffect(() => {
     if (isOpen) {
+      closeAllPreviews();
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -119,7 +128,10 @@ export function FloatingControls({ locale }: FloatingControlsProps) {
                   >
                     <Link
                       href={link.path}
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setIsOpen(false);
+                        closeAllPreviews();
+                      }}
                       className={`display-link group flex items-center gap-4 ${
                         isActive ? "text-[#06BC65]" : ""
                       }`}

@@ -53,6 +53,13 @@ export function CollageHero({
     setSelectedProject(null);
   }, [pathname]);
 
+  // Close modal on global preview close event (menu open / navigation)
+  useEffect(() => {
+    const handleClose = () => setSelectedProject(null);
+    window.addEventListener("portfolio-close-previews", handleClose);
+    return () => window.removeEventListener("portfolio-close-previews", handleClose);
+  }, []);
+
   const displayRole =
     (roleText && !roleText.toLowerCase().includes("applied ai") && !roleText.toLowerCase().includes("appliquée")
       ? roleText

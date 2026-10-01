@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -31,6 +32,19 @@ interface ProjectsListViewProps {
 
 export function ProjectsListView({ locale, projects }: ProjectsListViewProps) {
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const pathname = usePathname();
+
+  // Reset hover preview on route change
+  useEffect(() => {
+    setHoveredSlug(null);
+  }, [pathname]);
+
+  // Reset hover preview on global close event (menu open / navigation)
+  useEffect(() => {
+    const handleClose = () => setHoveredSlug(null);
+    window.addEventListener("portfolio-close-previews", handleClose);
+    return () => window.removeEventListener("portfolio-close-previews", handleClose);
+  }, []);
 
   const colors = ["bg-[#DBF505]", "bg-[#FFBDF7]", "bg-[#F05626]"];
 
