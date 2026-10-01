@@ -171,10 +171,10 @@ function DraggableCard({
       const cardW = cardRect.width;
 
       boundsRef.current = {
-        minX: heroRect.left - baseLeft - cardW * 0.35,
-        maxX: heroRect.right - baseRight + cardW * 0.35,
-        minY: heroRect.top - baseTop - 30,
-        maxY: heroRect.bottom - baseBottom + 30,
+        minX: heroRect.left - baseLeft + 8,
+        maxX: heroRect.right - baseRight - 8,
+        minY: heroRect.top - baseTop - 20,
+        maxY: heroRect.bottom - baseBottom + 20,
       };
     } else {
       boundsRef.current = null;
@@ -270,7 +270,7 @@ function DraggableCard({
      *   Inner <div>: Carries JS-managed drag transform ONLY.
      */
     <div
-      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-6 lg:-mx-8`}
+      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-3 lg:-mx-5 xl:-mx-6`}
       style={{
         zIndex: currentZIndex,
         position: "relative",
@@ -287,7 +287,7 @@ function DraggableCard({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleCardClickEvent}
-        className={`relative w-[145px] xs:w-[185px] sm:w-[240px] md:w-[280px] max-w-[46vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none`}
+        className={`relative w-[130px] xs:w-[155px] sm:w-[190px] md:w-[200px] lg:w-[230px] xl:w-[250px] max-w-[42vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none`}
         style={{
           willChange: "transform",
           transform: `translate3d(${pos.x}px, ${pos.y}px, 0px) rotate(${cfg.rotateValue}deg)`,
@@ -450,16 +450,16 @@ export function CollageHero({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full text-center mt-2 sm:mt-4 mb-2 md:mb-4 select-none z-10"
+          className="w-full text-center mt-2 sm:mt-4 mb-2 md:mb-4 select-none z-10 px-2 max-w-full overflow-hidden"
         >
-          <h1 className="display-xxl tracking-tighter text-[#363636] leading-[0.82]">
+          <h1 className="display-xxl tracking-tighter text-[#363636] leading-[0.82] max-w-full break-normal">
             {name}
           </h1>
         </motion.div>
 
         {/* Scattered Collage Row (Spencer Gabor Style — Draggable Fridge Magnets) */}
-        <div className="relative w-full my-4 sm:my-10 min-h-[360px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-2 sm:py-4">
-          <div className="relative w-full max-w-5xl flex flex-wrap md:flex-nowrap items-center justify-center gap-3 sm:gap-6 md:gap-0 px-2">
+        <div className="relative w-full my-4 sm:my-10 min-h-[360px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-2 sm:py-4 max-w-full">
+          <div className="relative w-full max-w-6xl flex flex-wrap md:flex-nowrap items-center justify-center gap-3 sm:gap-6 md:gap-0 px-2">
             {cardConfigs.map((cfg, idx) => {
               const dbProj = projects.find((p) => p.slug.toLowerCase() === cfg.slug.toLowerCase());
               const imageUrl = dbProj?.imageUrl || cfg.image;
