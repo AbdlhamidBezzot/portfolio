@@ -54,44 +54,48 @@ interface CardConfig {
 interface DraggableCardProps {
   cfg: CardConfig;
   idx: number;
-  currentZIndex: number;
   imageUrl: string;
   deviceType: string;
   heroRef: React.RefObject<HTMLDivElement>;
-  bringToFront: (slug: string) => void;
+  bringToFront: (wrapperEl: HTMLDivElement | null) => void;
   handleCardClick: (slug: string) => void;
 }
 
 function DraggableCard({
   cfg,
   idx,
-  currentZIndex,
   imageUrl,
   deviceType,
   heroRef,
   bringToFront,
   handleCardClick,
 }: DraggableCardProps) {
-  // Official React state position — synchronized ONLY at pointerup when dragged >= 5px
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-
-  // State to control idle float animation on outer wrapper
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Gesture tracking refs
+  // Pure DOM refs — ZERO React state re-renders during drag or pointerdown to prevent desync
   const posRef = useRef({ x: 0, y: 0 });
   const offsetRef = useRef({ x: 0, y: 0 });
   const startPointerRef = useRef({ x: 0, y: 0 });
   const maxDistanceRef = useRef(0);
-  const boundsRef = useRef<{ minX: number; maxX: number; minY: number; maxY: number } | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+
+  // Set initial transform on mount once without putting dynamic transform into JSX inline style
+  useEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg)`;
+    }
+  }, [cfg.rotateValue]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // Only accept primary button (left mouse click or touch)
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
-    bringToFront(cfg.slug);
+    // Bring card wrapper to front via direct DOM zIndex mutation
+    bringToFront(wrapperRef.current);
+
+    if (wrapperRef.current) {
+      wrapperRef.current.style.animationPlayState = "paused";
+    }
 
     const pointerX = e.clientX;
     const pointerY = e.clientY;
@@ -99,7 +103,6 @@ function DraggableCard({
     startPointerRef.current = { x: pointerX, y: pointerY };
     maxDistanceRef.current = 0;
     isDraggingRef.current = true;
-    setIsDragging(true);
 
     // Calculate exact cursor offset from current card position (NO JUMP ON CLICK!)
     offsetRef.current = {
@@ -107,32 +110,21 @@ function DraggableCard({
       y: pointerY - posRef.current.y,
     };
 
-    // Pre-calculate container bounds ONCE at pointerdown
-    if (heroRef.current && cardRef.current) {
-      const heroRect = heroRef.current.getBoundingClientRect();
+    // Pre-calculate un-translated card geometry ONCE at pointerdown
+    let cardUnscaledLeft = 0;
+    let cardUnscaledRight = 0;
+
+    if (cardRef.current) {
       const cardRect = cardRef.current.getBoundingClientRect();
-
       const curX = posRef.current.x;
-      const curY = posRef.current.y;
 
-      const baseLeft = cardRect.left - curX;
-      const baseRight = cardRect.right - curX;
-      const baseTop = cardRect.top - curY;
-      const baseBottom = cardRect.bottom - curY;
-
-      boundsRef.current = {
-        minX: heroRect.left - baseLeft + 8,
-        maxX: heroRect.right - baseRight - 8,
-        minY: heroRect.top - baseTop - 20,
-        maxY: heroRect.bottom - baseBottom + 20,
-      };
-    } else {
-      boundsRef.current = null;
+      cardUnscaledLeft = cardRect.left - curX;
+      cardUnscaledRight = cardRect.right - curX;
     }
 
-    // Disable CSS transition during active drag & apply scale(1.08)
+    // Disable CSS transition IMMEDIATELY on pointerdown & apply drag scale(1.08)
     if (cardRef.current) {
-      cardRef.current.style.transition = "none";
+      cardRef.current.style.setProperty("transition", "none", "important");
       cardRef.current.style.willChange = "transform";
       cardRef.current.style.pointerEvents = "auto";
       cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
@@ -153,14 +145,20 @@ function DraggableCard({
       let newX = moveEvent.clientX - offsetRef.current.x;
       let newY = moveEvent.clientY - offsetRef.current.y;
 
-      if (boundsRef.current) {
-        newX = Math.max(boundsRef.current.minX, Math.min(boundsRef.current.maxX, newX));
-        newY = Math.max(boundsRef.current.minY, Math.min(boundsRef.current.maxY, newY));
+      // Clamp X strictly to physical screen edges (0 to window.innerWidth)
+      const minX = -cardUnscaledLeft;
+      const maxX = window.innerWidth - cardUnscaledRight;
+      if (minX <= maxX) {
+        newX = Math.max(minX, Math.min(maxX, newX));
       }
+
+      // Safe Y clamping range (-350px to +600px) that never locks or freezes regardless of page scroll
+      newY = Math.max(-350, Math.min(600, newY));
 
       posRef.current = { x: newX, y: newY };
 
       if (cardRef.current) {
+        cardRef.current.style.setProperty("transition", "none", "important");
         cardRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
       }
     };
@@ -171,7 +169,9 @@ function DraggableCard({
       window.removeEventListener("pointercancel", onWindowPointerUp);
 
       isDraggingRef.current = false;
-      setIsDragging(false);
+      if (wrapperRef.current) {
+        wrapperRef.current.style.animationPlayState = "running";
+      }
 
       const endDist = Math.hypot(
         upEvent.clientX - startPointerRef.current.x,
@@ -179,23 +179,14 @@ function DraggableCard({
       );
       const totalDist = Math.max(maxDistanceRef.current, endDist);
 
-      if (totalDist < 5) {
-        // Tapped/clicked without dragging -> restore resting style & trigger detail modal
-        if (cardRef.current) {
-          cardRef.current.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
-          cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
-        }
-        handleCardClick(cfg.slug);
-      } else {
-        // Dragged -> commit new resting position to React state ONCE
-        const finalX = posRef.current.x;
-        const finalY = posRef.current.y;
-        setPos({ x: finalX, y: finalY });
+      if (cardRef.current) {
+        cardRef.current.style.setProperty("transition", "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)");
+        cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
+      }
 
-        if (cardRef.current) {
-          cardRef.current.style.transition = "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)";
-          cardRef.current.style.transform = `translate3d(${finalX}px, ${finalY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
-        }
+      if (totalDist < 5) {
+        // Tapped/clicked without dragging -> trigger detail modal
+        handleCardClick(cfg.slug);
       }
     };
 
@@ -204,44 +195,26 @@ function DraggableCard({
     window.addEventListener("pointercancel", onWindowPointerUp);
   };
 
-  const handleMouseEnter = () => {
-    if (!isDraggingRef.current && cardRef.current) {
-      cardRef.current.style.transition = "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)";
-      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.05)`;
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!isDraggingRef.current && cardRef.current) {
-      cardRef.current.style.transition = "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)";
-      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
-    }
-  };
-
   return (
     <div
-      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-3 lg:-mx-5 xl:-mx-6`}
+      ref={wrapperRef}
+      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-3 lg:-mx-5 xl:-mx-6 touch-none select-none`}
       style={{
-        zIndex: currentZIndex,
+        zIndex: cfg.zIndex,
         position: "relative",
-        animationPlayState: isDragging ? "paused" : "running",
       }}
     >
       <div
         ref={cardRef}
         onPointerDown={handlePointerDown}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className={`relative w-[130px] xs:w-[155px] sm:w-[190px] md:w-[200px] lg:w-[230px] xl:w-[250px] max-w-[42vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none pointer-events-auto`}
         style={{
           willChange: "transform",
-          transform: `translate3d(${pos.x}px, ${pos.y}px, 0px) rotate(${cfg.rotateValue}deg)`,
-          transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
           pointerEvents: "auto",
         }}
       >
         {/* Photo area with DeviceFrame */}
-        <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 pointer-events-none">
+        <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 cursor-grab active:cursor-grabbing select-none pointer-events-auto">
           <DeviceFrame
             deviceType={deviceType}
             imageUrl={imageUrl}
@@ -250,12 +223,12 @@ function DraggableCard({
         </div>
 
         {/* Card Bottom Label */}
-        <div className="flex justify-between items-center px-1 pt-0.5">
+        <div className="flex justify-between items-center px-1 pt-0.5 cursor-grab active:cursor-grabbing select-none pointer-events-auto">
           <div>
-            <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none">
+            <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none cursor-grab active:cursor-grabbing select-none">
               {cfg.title}
             </div>
-            <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none">
+            <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none cursor-grab active:cursor-grabbing select-none">
               {cfg.subtitle}
             </div>
           </div>
@@ -284,15 +257,15 @@ export function CollageHero({
   projects = [],
 }: CollageHeroProps) {
   const [selectedProject, setSelectedProject] = useState<ModalProject | null>(null);
-  const [topZIndex, setTopZIndex] = useState(50);
-  const [cardZIndexes, setCardZIndexes] = useState<{ [key: string]: number }>({});
+  const topZRef = useRef(50);
   const heroRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  const bringToFront = (slug: string) => {
-    const nextZ = topZIndex + 1;
-    setTopZIndex(nextZ);
-    setCardZIndexes((prev) => ({ ...prev, [slug]: nextZ }));
+  const bringToFront = (wrapperEl: HTMLDivElement | null) => {
+    if (wrapperEl) {
+      topZRef.current += 1;
+      wrapperEl.style.zIndex = String(topZRef.current);
+    }
   };
 
   // Close modal when route changes (e.g., user navigates while modal is open)
@@ -389,7 +362,7 @@ export function CollageHero({
     <>
       <section
         ref={heroRef}
-        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-16 sm:pt-20 md:pt-24 pb-16 overflow-hidden flex flex-col items-center"
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-16 sm:pt-20 md:pt-24 pb-16 flex flex-col items-center"
       >
         {/* Name Display positioned closer to cards */}
         <motion.div
@@ -417,14 +390,11 @@ export function CollageHero({
               const dbProj = projects.find((p) => p.slug.toLowerCase() === cfg.slug.toLowerCase());
               const imageUrl = dbProj?.imageUrl || cfg.image;
               const deviceType = dbProj?.deviceType || cfg.deviceType;
-              const currentZIndex = cardZIndexes[cfg.slug] || cfg.zIndex;
-
               return (
                 <DraggableCard
                   key={cfg.slug}
                   cfg={cfg}
                   idx={idx}
-                  currentZIndex={currentZIndex}
                   imageUrl={imageUrl}
                   deviceType={deviceType}
                   heroRef={heroRef}
