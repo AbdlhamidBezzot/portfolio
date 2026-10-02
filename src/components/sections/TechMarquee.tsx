@@ -13,6 +13,7 @@ const DEFAULT_TECHS = [
   "POSTGRESQL",
   "REDIS",
   "C++",
+  "JAVA",
   "TYPESCRIPT",
   "SCIKIT-LEARN",
   "TAILWIND CSS",

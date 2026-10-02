@@ -17,7 +17,7 @@ const blocks = [
   [
     "03",
     "IA APPLIQUÉE",
-    "Python · Scikit-Learn · TensorFlow · KNIME · Pandas · NumPy · Matplotlib · Jupyter · Talend · LLM APIs (Claude) · Prompt engineering",
+    "Python · Scikit-Learn · TensorFlow · KNIME · Pandas · NumPy · Matplotlib · Jupyter · Talend",
     "Des modèles utiles, intégrés au produit plutôt que laissés dans un notebook."
   ]
 ];

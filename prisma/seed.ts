@@ -29,7 +29,7 @@ async function main() {
   const stackData = [
     ["Interfaces", "Interfaces", ["HTML", "CSS", "JavaScript", "TypeScript", "PHP", "React", "Next.js", "NestJS", "Tailwind CSS", "Node.js", "Vite"]],
     ["Systems & data", "Systèmes & données", ["PostgreSQL", "MySQL", "Redis", "PL/SQL", "T-SQL", "API REST", "Prisma", "Docker", "Git & GitHub", "Linux", "Nginx", "Vercel"]],
-    ["AI Engineer", "AI Engineer", ["Python", "Scikit-Learn", "TensorFlow", "KNIME", "Pandas", "NumPy", "Matplotlib", "Jupyter", "Talend", "LLM APIs (Claude)", "Prompt engineering"]]
+    ["AI Engineer", "AI Engineer", ["Python", "Scikit-Learn", "TensorFlow", "KNIME", "Pandas", "NumPy", "Matplotlib", "Jupyter", "Talend"]]
   ] as const;
   for (let order = 0; order < stackData.length; order++) {
     const [nameEn, nameFr, labels] = stackData[order];

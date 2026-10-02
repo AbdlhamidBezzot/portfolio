@@ -14,6 +14,6 @@ export const tech = {
   ai: [
     "Python", "Scikit-Learn", "TensorFlow", "KNIME",
     "Pandas", "NumPy", "Matplotlib",
-    "Jupyter", "Talend", "LLM APIs (Claude)", "Prompt engineering"
+    "Jupyter", "Talend"
   ]
 };

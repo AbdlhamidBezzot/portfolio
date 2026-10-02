@@ -34,7 +34,7 @@ export function AboutView({ locale, manifestoEn, manifestoFr }: AboutViewProps) 
       title: "03 AI ENGINEER",
       icon: Cpu,
       color: "bg-[#F05626] text-white",
-      items: ["PYTHON", "SCIKIT-LEARN", "TENSORFLOW", "KNIME", "PANDAS", "NUMPY", "MATPLOTLIB", "JUPYTER", "TALEND", "LLM APIS", "PROMPT ENG."],
+      items: ["PYTHON", "SCIKIT-LEARN", "TENSORFLOW", "KNIME", "PANDAS", "NUMPY", "MATPLOTLIB", "JUPYTER", "TALEND"],
     },
   ];
 

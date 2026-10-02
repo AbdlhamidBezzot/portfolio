@@ -62,8 +62,6 @@ export function CoreStackShowcase({ locale }: CoreStackShowcaseProps) {
         "Matplotlib",
         "Jupyter",
         "Talend",
-        "LLM APIs (Claude)",
-        "Prompt engineering",
       ],
     },
   ];
