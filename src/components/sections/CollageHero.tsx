@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { ArrowDownRight } from "lucide-react";
@@ -51,170 +49,38 @@ interface CardConfig {
   deviceType: string;
 }
 
-interface DraggableCardProps {
+interface FloatingCardProps {
   cfg: CardConfig;
   idx: number;
   imageUrl: string;
   deviceType: string;
-  heroRef: React.RefObject<HTMLDivElement>;
-  bringToFront: (wrapperEl: HTMLDivElement | null) => void;
   handleCardClick: (slug: string) => void;
 }
 
-function DraggableCard({
+function FloatingCard({
   cfg,
   idx,
   imageUrl,
   deviceType,
-  heroRef,
-  bringToFront,
   handleCardClick,
-}: DraggableCardProps) {
-  // Pure DOM refs — ZERO React state re-renders during drag or pointerdown to prevent desync
-  const posRef = useRef({ x: 0, y: 0 });
-  const offsetRef = useRef({ x: 0, y: 0 });
-  const startPointerRef = useRef({ x: 0, y: 0 });
-  const maxDistanceRef = useRef(0);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-
-  // Set initial transform on mount once without putting dynamic transform into JSX inline style
-  useEffect(() => {
-    if (cardRef.current) {
-      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg)`;
-    }
-  }, [cfg.rotateValue]);
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Only accept primary button (left mouse click or touch)
-    if (e.button !== 0 && e.pointerType === "mouse") return;
-
-    // Bring card wrapper to front via direct DOM zIndex mutation
-    bringToFront(wrapperRef.current);
-
-    if (wrapperRef.current) {
-      wrapperRef.current.style.animationPlayState = "paused";
-    }
-
-    const pointerX = e.clientX;
-    const pointerY = e.clientY;
-
-    startPointerRef.current = { x: pointerX, y: pointerY };
-    maxDistanceRef.current = 0;
-    isDraggingRef.current = true;
-
-    // Calculate exact cursor offset from current card position (NO JUMP ON CLICK!)
-    offsetRef.current = {
-      x: pointerX - posRef.current.x,
-      y: pointerY - posRef.current.y,
-    };
-
-    // Pre-calculate un-translated card geometry ONCE at pointerdown
-    let cardUnscaledLeft = 0;
-    let cardUnscaledRight = 0;
-
-    if (cardRef.current) {
-      const cardRect = cardRef.current.getBoundingClientRect();
-      const curX = posRef.current.x;
-
-      cardUnscaledLeft = cardRect.left - curX;
-      cardUnscaledRight = cardRect.right - curX;
-    }
-
-    // Disable CSS transition IMMEDIATELY on pointerdown & apply drag scale(1.08)
-    if (cardRef.current) {
-      cardRef.current.style.setProperty("transition", "none", "important");
-      cardRef.current.style.willChange = "transform";
-      cardRef.current.style.pointerEvents = "auto";
-      cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
-    }
-
-    // Global window handlers attached for the duration of this gesture
-    const onWindowPointerMove = (moveEvent: PointerEvent) => {
-      if (!isDraggingRef.current) return;
-
-      const currentDist = Math.hypot(
-        moveEvent.clientX - startPointerRef.current.x,
-        moveEvent.clientY - startPointerRef.current.y
-      );
-      if (currentDist > maxDistanceRef.current) {
-        maxDistanceRef.current = currentDist;
-      }
-
-      let newX = moveEvent.clientX - offsetRef.current.x;
-      let newY = moveEvent.clientY - offsetRef.current.y;
-
-      // Clamp X strictly to physical screen edges (0 to window.innerWidth)
-      const minX = -cardUnscaledLeft;
-      const maxX = window.innerWidth - cardUnscaledRight;
-      if (minX <= maxX) {
-        newX = Math.max(minX, Math.min(maxX, newX));
-      }
-
-      // Safe Y clamping range (-350px to +600px) that never locks or freezes regardless of page scroll
-      newY = Math.max(-350, Math.min(600, newY));
-
-      posRef.current = { x: newX, y: newY };
-
-      if (cardRef.current) {
-        cardRef.current.style.setProperty("transition", "none", "important");
-        cardRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0px) rotate(${cfg.rotateValue}deg) scale(1.08)`;
-      }
-    };
-
-    const onWindowPointerUp = (upEvent: PointerEvent) => {
-      window.removeEventListener("pointermove", onWindowPointerMove);
-      window.removeEventListener("pointerup", onWindowPointerUp);
-      window.removeEventListener("pointercancel", onWindowPointerUp);
-
-      isDraggingRef.current = false;
-      if (wrapperRef.current) {
-        wrapperRef.current.style.animationPlayState = "running";
-      }
-
-      const endDist = Math.hypot(
-        upEvent.clientX - startPointerRef.current.x,
-        upEvent.clientY - startPointerRef.current.y
-      );
-      const totalDist = Math.max(maxDistanceRef.current, endDist);
-
-      if (cardRef.current) {
-        cardRef.current.style.setProperty("transition", "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)");
-        cardRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0px) rotate(${cfg.rotateValue}deg) scale(1)`;
-      }
-
-      if (totalDist < 5) {
-        // Tapped/clicked without dragging -> trigger detail modal
-        handleCardClick(cfg.slug);
-      }
-    };
-
-    window.addEventListener("pointermove", onWindowPointerMove);
-    window.addEventListener("pointerup", onWindowPointerUp);
-    window.addEventListener("pointercancel", onWindowPointerUp);
-  };
-
+}: FloatingCardProps) {
   return (
     <div
-      ref={wrapperRef}
-      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-3 lg:-mx-5 xl:-mx-6 touch-none select-none`}
+      className={`card-float-idle card-float-idle-${idx} mx-0 md:-mx-3 lg:-mx-5 xl:-mx-6 select-none`}
       style={{
         zIndex: cfg.zIndex,
         position: "relative",
       }}
     >
       <div
-        ref={cardRef}
-        onPointerDown={handlePointerDown}
-        className={`relative w-[130px] xs:w-[155px] sm:w-[190px] md:w-[200px] lg:w-[230px] xl:w-[250px] max-w-[42vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-grab active:cursor-grabbing touch-none pointer-events-auto`}
+        onClick={() => handleCardClick(cfg.slug)}
+        className={`relative w-[130px] xs:w-[155px] sm:w-[190px] md:w-[200px] lg:w-[230px] xl:w-[250px] max-w-[42vw] md:max-w-none p-2.5 sm:p-4 rounded-[18px] sm:rounded-[22px] ${cfg.bgColor} ${cfg.textColor} shadow-[0_12px_32px_rgba(0,0,0,0.18)] select-none group cursor-pointer transition-transform duration-300 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-[0_22px_45px_rgba(0,0,0,0.25)] hover:z-30 pointer-events-auto`}
         style={{
-          willChange: "transform",
-          pointerEvents: "auto",
+          transform: `rotate(${cfg.rotateValue}deg)`,
         }}
       >
         {/* Photo area with DeviceFrame */}
-        <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 cursor-grab active:cursor-grabbing select-none pointer-events-auto">
+        <div className="relative w-full h-[120px] xs:h-[150px] sm:h-[200px] md:h-[230px] rounded-[14px] overflow-hidden bg-black/10 mb-2 sm:mb-3 border border-black/5 flex items-center justify-center p-1.5 sm:p-2 select-none pointer-events-auto">
           <DeviceFrame
             deviceType={deviceType}
             imageUrl={imageUrl}
@@ -223,24 +89,23 @@ function DraggableCard({
         </div>
 
         {/* Card Bottom Label */}
-        <div className="flex justify-between items-center px-1 pt-0.5 cursor-grab active:cursor-grabbing select-none pointer-events-auto">
+        <div className="flex justify-between items-center px-1 pt-0.5 select-none pointer-events-auto">
           <div>
-            <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none cursor-grab active:cursor-grabbing select-none">
+            <div className="font-display font-black text-sm xs:text-base sm:text-xl md:text-2xl tracking-tight leading-none select-none">
               {cfg.title}
             </div>
-            <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none cursor-grab active:cursor-grabbing select-none">
+            <div className="font-display font-bold text-[9px] sm:text-[11px] opacity-80 mt-0.5 sm:mt-1 uppercase truncate max-w-[100px] sm:max-w-none select-none">
               {cfg.subtitle}
             </div>
           </div>
           <button
             type="button"
-            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
               handleCardClick(cfg.slug);
             }}
             aria-label={`Open ${cfg.title} details`}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer z-10 pointer-events-auto"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors cursor-pointer z-10 pointer-events-auto"
           >
             <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
@@ -257,16 +122,8 @@ export function CollageHero({
   projects = [],
 }: CollageHeroProps) {
   const [selectedProject, setSelectedProject] = useState<ModalProject | null>(null);
-  const topZRef = useRef(50);
   const heroRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-
-  const bringToFront = (wrapperEl: HTMLDivElement | null) => {
-    if (wrapperEl) {
-      topZRef.current += 1;
-      wrapperEl.style.zIndex = String(topZRef.current);
-    }
-  };
 
   // Close modal when route changes (e.g., user navigates while modal is open)
   useEffect(() => {
@@ -383,7 +240,7 @@ export function CollageHero({
           </h1>
         </motion.div>
 
-        {/* Scattered Collage Row (Spencer Gabor Style — Draggable Fridge Magnets) */}
+        {/* Scattered Collage Row */}
         <div className="relative w-full my-4 sm:my-10 min-h-[360px] sm:min-h-[460px] md:min-h-[500px] flex items-center justify-center py-2 sm:py-4 max-w-full">
           <div className="relative w-full max-w-6xl flex flex-wrap md:flex-nowrap items-center justify-center gap-3 sm:gap-6 md:gap-0 px-2">
             {cardConfigs.map((cfg, idx) => {
@@ -391,14 +248,12 @@ export function CollageHero({
               const imageUrl = dbProj?.imageUrl || cfg.image;
               const deviceType = dbProj?.deviceType || cfg.deviceType;
               return (
-                <DraggableCard
+                <FloatingCard
                   key={cfg.slug}
                   cfg={cfg}
                   idx={idx}
                   imageUrl={imageUrl}
                   deviceType={deviceType}
-                  heroRef={heroRef}
-                  bringToFront={bringToFront}
                   handleCardClick={handleCardClick}
                 />
               );
